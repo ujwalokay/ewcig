@@ -3,42 +3,87 @@ import { StatsCard } from "@/components/dashboard/stats-card";
 import { PCGrid } from "@/components/dashboard/pc-grid";
 import { Users, DollarSign, Clock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { ActivityLog, Terminal } from "@shared/schema";
+import { formatDistanceToNow } from "date-fns";
 import generatedImage from '@assets/generated_images/futuristic_gaming_cafe_interior_concept_art.png'
 
+interface DashboardStats {
+  activeSessions: number;
+  totalTerminals: number;
+  todayRevenue: string;
+  topGames: { name: string; count: number; percent: number }[];
+}
+
 export default function Dashboard() {
+  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+    queryKey: ["/api/dashboard/stats"],
+  });
+
+  const { data: terminals } = useQuery<Terminal[]>({
+    queryKey: ["/api/terminals"],
+  });
+
+  const { data: activityLogs } = useQuery<ActivityLog[]>({
+    queryKey: ["/api/activity-logs"],
+  });
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case "login": return "text-emerald-400";
+      case "logout": return "text-zinc-400";
+      case "topup": 
+      case "order": return "text-primary";
+      case "system": return "text-blue-400";
+      default: return "text-white";
+    }
+  };
+
+  const maintenanceTerminals = terminals?.filter(t => t.status === "Maintenance") || [];
+  const offlineTerminals = terminals?.filter(t => t.status === "Offline") || [];
+
   return (
     <MainLayout title="Command Center">
       <div className="space-y-8">
         
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard 
-            title="Active Sessions" 
-            value="28/40" 
-            icon={Users} 
-            trend="12% vs last hr" 
-            trendUp={true}
-          />
-          <StatsCard 
-            title="Today's Revenue" 
-            value="$1,245.50" 
-            icon={DollarSign} 
-            trend="8% vs yesterday" 
-            trendUp={true}
-          />
-          <StatsCard 
-            title="Avg Session Time" 
-            value="2h 14m" 
-            icon={Clock} 
-            description="Peak hours approaching"
-          />
-          <StatsCard 
-            title="System Load" 
-            value="98%" 
-            icon={Zap} 
-            trend="High Usage" 
-            trendUp={false} // Warning color
-          />
+          {statsLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-28" />
+            ))
+          ) : (
+            <>
+              <StatsCard 
+                title="Active Sessions" 
+                value={`${stats?.activeSessions || 0}/${stats?.totalTerminals || 0}`}
+                icon={Users} 
+                trend="Live count" 
+                trendUp={true}
+              />
+              <StatsCard 
+                title="Today's Revenue" 
+                value={`$${stats?.todayRevenue || "0.00"}`}
+                icon={DollarSign} 
+                trend="Updated live" 
+                trendUp={true}
+              />
+              <StatsCard 
+                title="Available PCs" 
+                value={`${(stats?.totalTerminals || 0) - (stats?.activeSessions || 0)}`}
+                icon={Clock} 
+                description="Ready for use"
+              />
+              <StatsCard 
+                title="System Load" 
+                value={stats?.totalTerminals ? `${Math.round((stats.activeSessions / stats.totalTerminals) * 100)}%` : "0%"}
+                icon={Zap} 
+                trend={(stats?.activeSessions || 0) > (stats?.totalTerminals || 1) * 0.8 ? "High Usage" : "Normal"} 
+                trendUp={false}
+              />
+            </>
+          )}
         </div>
 
         {/* Main Grid Area */}
@@ -65,48 +110,56 @@ export default function Dashboard() {
               <div className="bg-card border border-border rounded-xl p-6 h-64 flex flex-col">
                 <h3 className="text-lg font-display font-semibold text-white mb-4">Top Games Playing</h3>
                 <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                  {[
-                    { name: "Valorant", count: 12, percent: 45 },
-                    { name: "League of Legends", count: 8, percent: 30 },
-                    { name: "Counter-Strike 2", count: 5, percent: 15 },
-                    { name: "Dota 2", count: 3, percent: 10 },
-                  ].map((game, i) => (
-                    <div key={i} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium text-white">{game.name}</span>
-                        <span className="text-muted-foreground">{game.count} active</span>
+                  {stats?.topGames && stats.topGames.length > 0 ? (
+                    stats.topGames.map((game, i) => (
+                      <div key={i} className="space-y-1" data-testid={`game-stats-${i}`}>
+                        <div className="flex justify-between text-sm gap-2">
+                          <span className="font-medium text-white">{game.name}</span>
+                          <span className="text-muted-foreground">{game.count} active</span>
+                        </div>
+                        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary" 
+                            style={{ width: `${game.percent}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary" 
-                          style={{ width: `${game.percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-sm">No games currently being played</p>
+                  )}
                 </div>
               </div>
 
               <div className="bg-card border border-border rounded-xl p-6 h-64 flex flex-col">
                 <h3 className="text-lg font-display font-semibold text-white mb-4">Hardware Alerts</h3>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <Zap className="h-5 w-5 text-red-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-bold text-red-400">PC-12 Overheating</p>
-                      <p className="text-xs text-red-400/70">GPU temp reached 92°C</p>
-                    </div>
-                    <Button size="sm" variant="outline" className="ml-auto h-7 text-xs border-red-500/30 text-red-400 hover:bg-red-500/20">Check</Button>
-                  </div>
-                  
-                   <div className="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <Clock className="h-5 w-5 text-yellow-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-bold text-yellow-400">PC-08 Maintenance Due</p>
-                      <p className="text-xs text-yellow-400/70">Driver updates pending</p>
-                    </div>
-                     <Button size="sm" variant="outline" className="ml-auto h-7 text-xs border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20">Update</Button>
-                  </div>
+                <div className="space-y-3 overflow-y-auto">
+                  {maintenanceTerminals.length > 0 || offlineTerminals.length > 0 ? (
+                    <>
+                      {maintenanceTerminals.slice(0, 2).map((terminal) => (
+                        <div key={terminal.id} className="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                          <Clock className="h-5 w-5 text-yellow-500 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-bold text-yellow-400">{terminal.name} Maintenance Due</p>
+                            <p className="text-xs text-yellow-400/70">Scheduled maintenance</p>
+                          </div>
+                          <Button size="sm" variant="outline" className="ml-auto h-7 text-xs border-yellow-500/30 text-yellow-400">Update</Button>
+                        </div>
+                      ))}
+                      {offlineTerminals.slice(0, 2).map((terminal) => (
+                        <div key={terminal.id} className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                          <Zap className="h-5 w-5 text-red-500 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-bold text-red-400">{terminal.name} Offline</p>
+                            <p className="text-xs text-red-400/70">Connection lost</p>
+                          </div>
+                          <Button size="sm" variant="outline" className="ml-auto h-7 text-xs border-red-500/30 text-red-400">Check</Button>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">All systems running normally</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -118,32 +171,25 @@ export default function Dashboard() {
               <h3 className="font-display font-bold text-white">Live Activity</h3>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
-              {[
-                { type: "login", user: "ProGamer99", msg: "logged into PC-05", time: "Just now", color: "text-emerald-400" },
-                { type: "order", user: "Table 4", msg: "ordered Red Bull x2", time: "2m ago", color: "text-primary" },
-                { type: "logout", user: "CasualDave", msg: "logged out from PC-22", time: "5m ago", color: "text-zinc-400" },
-                { type: "system", user: "System", msg: "Backup completed", time: "12m ago", color: "text-blue-400" },
-                { type: "login", user: "JinxMain", msg: "logged into PC-11", time: "15m ago", color: "text-emerald-400" },
-                { type: "order", user: "PC-30", msg: "ordered Pizza Slice", time: "18m ago", color: "text-primary" },
-                { type: "login", user: "ProGamer99", msg: "logged into PC-05", time: "Just now", color: "text-emerald-400" },
-                { type: "order", user: "Table 4", msg: "ordered Red Bull x2", time: "2m ago", color: "text-primary" },
-                { type: "logout", user: "CasualDave", msg: "logged out from PC-22", time: "5m ago", color: "text-zinc-400" },
-                { type: "system", user: "System", msg: "Backup completed", time: "12m ago", color: "text-blue-400" },
-              ].map((item, i) => (
-                <div key={i} className="flex gap-3 relative pb-6 last:pb-0">
-                  {i !== 9 && <div className="absolute left-2 top-5 bottom-0 w-px bg-white/10" />}
-                  <div className={`mt-1 h-4 w-4 rounded-full border-2 border-background shrink-0 ${item.color.replace('text-', 'bg-')}`} />
-                  <div>
-                    <p className="text-sm text-white">
-                      <span className="font-bold">{item.user}</span> {item.msg}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{item.time}</p>
+              {activityLogs && activityLogs.length > 0 ? (
+                activityLogs.map((item, i) => (
+                  <div key={item.id} className="flex gap-3 relative pb-6 last:pb-0" data-testid={`activity-log-${item.id}`}>
+                    {i !== activityLogs.length - 1 && <div className="absolute left-2 top-5 bottom-0 w-px bg-white/10" />}
+                    <div className={`mt-1 h-4 w-4 rounded-full border-2 border-background shrink-0 ${getActivityColor(item.type).replace('text-', 'bg-')}`} />
+                    <div>
+                      <p className="text-sm text-white">{item.message}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm text-center">No recent activity</p>
+              )}
             </div>
             <div className="p-4 border-t border-white/5 bg-white/5">
-              <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold tracking-wide">
+              <Button className="w-full bg-primary text-white font-bold tracking-wide" data-testid="button-view-all-logs">
                 VIEW ALL LOGS
               </Button>
             </div>
