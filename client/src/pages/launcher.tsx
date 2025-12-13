@@ -174,28 +174,28 @@ export default function Launcher() {
           </div>
         </div>
 
-        {/* Ads Section - Takes most of the screen */}
-        <div className="relative z-20 flex-1 flex items-center justify-center px-8 py-4">
-          <div className="w-full max-w-5xl">
-            {/* Main Ad Banner */}
+        {/* Ads Section - Full Screen */}
+        <div className="relative z-20 flex-1 flex items-center justify-center p-4">
+          <div className="w-full h-full">
+            {/* Main Ad Banner - Full Size */}
             <div 
               className={cn(
-                "relative h-[400px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500",
+                "relative h-full w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500",
                 `bg-gradient-to-br ${currentAd.gradient}`
               )}
             >
               <div className="absolute inset-0 bg-black/20" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                <Badge className="mb-4 bg-white/20 text-white border-white/30 uppercase tracking-wider">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
+                <Badge className="mb-6 bg-white/20 text-white border-white/30 uppercase tracking-wider text-sm px-4 py-1">
                   Featured
                 </Badge>
-                <h2 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">
+                <h2 className="text-7xl font-bold text-white mb-4 drop-shadow-lg">
                   {currentAd.title}
                 </h2>
-                <p className="text-2xl text-white/90 font-semibold mb-2">
+                <p className="text-3xl text-white/90 font-semibold mb-4">
                   {currentAd.subtitle}
                 </p>
-                <p className="text-lg text-white/70 max-w-md">
+                <p className="text-xl text-white/70 max-w-2xl">
                   {currentAd.description}
                 </p>
               </div>
