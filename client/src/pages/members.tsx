@@ -1,10 +1,10 @@
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Star, Clock, Trophy } from "lucide-react";
+import { AddMemberDialog } from "@/components/dialogs/add-member-dialog";
+import { TopUpDialog } from "@/components/dialogs/top-up-dialog";
 
 export default function Members() {
   const members = Array.from({ length: 12 }, (_, i) => ({
@@ -27,9 +27,7 @@ export default function Members() {
     <MainLayout 
       title="Member Database" 
       actions={
-        <Button className="bg-primary text-white hover:bg-primary/90">
-          <UserPlus className="h-4 w-4 mr-2" /> Add Member
-        </Button>
+        <AddMemberDialog />
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -62,7 +60,7 @@ export default function Members() {
               
               <div className="flex gap-2 w-full">
                  <Button variant="outline" className="flex-1 border-white/10 hover:bg-white/5">Profile</Button>
-                 <Button className="flex-1 bg-white/5 hover:bg-white/10 text-primary">Top Up</Button>
+                 <TopUpDialog />
               </div>
             </CardContent>
           </Card>

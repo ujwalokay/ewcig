@@ -1,10 +1,10 @@
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Gamepad2, Download, Play, RefreshCw, AlertCircle } from "lucide-react";
+import { Gamepad2, Play, RefreshCw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AddGameDialog } from "@/components/dialogs/add-game-dialog";
 
 export default function Games() {
   const games = [
@@ -22,9 +22,12 @@ export default function Games() {
     <MainLayout 
       title="Game Library"
       actions={
-        <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10">
-          <RefreshCw className="h-4 w-4 mr-2" /> Check Updates
-        </Button>
+        <div className="flex gap-2">
+            <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10">
+            <RefreshCw className="h-4 w-4 mr-2" /> Check Updates
+            </Button>
+            <AddGameDialog />
+        </div>
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
