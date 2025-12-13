@@ -10,7 +10,8 @@ import {
   LogOut, Bell, Wifi, Volume2, Search, Play, 
   Utensils, AlertTriangle, User, Lock, Home,
   Trophy, Settings, HelpCircle, Gift, Users, AppWindow,
-  Chrome, Music, Video, FileText, Calculator, Camera, MessageSquare, Mail
+  Chrome, Music, Video, FileText, Calculator, Camera, MessageSquare, Mail,
+  X, Minus, Plus, Trash2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -426,38 +427,202 @@ function GamesContent({ onLaunch }: { onLaunch: (name: string) => void }) {
   );
 }
 
+// Cart Item Type
+type CartItem = {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  quantity: number;
+};
+
 // Food Content
 function FoodContent({ onOrder }: { onOrder: (name: string) => void }) {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [showCart, setShowCart] = useState(false);
+
+  const addToCart = (item: typeof foodMenu[0]) => {
+    setCart(prev => {
+      const existing = prev.find(c => c.id === item.id);
+      if (existing) {
+        return prev.map(c => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c);
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+    toast({
+      title: "Added to Cart",
+      description: `${item.name} added to your cart.`,
+    });
+  };
+
+  const removeFromCart = (id: number) => {
+    setCart(prev => prev.filter(c => c.id !== id));
+  };
+
+  const updateQuantity = (id: number, delta: number) => {
+    setCart(prev => prev.map(c => {
+      if (c.id === id) {
+        const newQty = c.quantity + delta;
+        if (newQty <= 0) return c;
+        return { ...c, quantity: newQty };
+      }
+      return c;
+    }));
+  };
+
+  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleCheckout = () => {
+    if (cart.length === 0) return;
+    const items = cart.map(c => `${c.quantity}x ${c.name}`).join(', ');
+    onOrder(items);
+    setCart([]);
+    setShowCart(false);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4 flex-wrap">
-        <Button className="bg-primary text-white">All Items</Button>
-        <Button variant="outline" className="border-white/10">Energy</Button>
-        <Button variant="outline" className="border-white/10">Drinks</Button>
-        <Button variant="outline" className="border-white/10">Food</Button>
-        <Button variant="outline" className="border-white/10">Snacks</Button>
-      </div>
-      
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {foodMenu.map((item) => (
-          <div 
-            key={item.id} 
-            className="bg-card border border-border/50 rounded-xl p-6 hover:border-primary/50 cursor-pointer transition-all group"
-            onClick={() => onOrder(item.name)}
-            data-testid={`card-menu-${item.id}`}
-          >
-            <div className="h-24 w-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Utensils className="h-10 w-10 text-primary/80" />
-            </div>
-            <h3 className="font-bold text-white text-center mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
-            <p className="text-sm text-muted-foreground text-center mb-3">{item.category}</p>
-            <div className="flex items-center justify-between">
-              <p className="text-primary font-mono font-bold text-lg">${item.price.toFixed(2)}</p>
-              <Button size="sm" className="bg-white/5 hover:bg-primary hover:text-white">Add to Cart</Button>
-            </div>
+    <div className="flex gap-6">
+      <div className="flex-1 space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-4 flex-wrap">
+            <Button className="bg-primary text-white">All Items</Button>
+            <Button variant="outline" className="border-white/10">Energy</Button>
+            <Button variant="outline" className="border-white/10">Drinks</Button>
+            <Button variant="outline" className="border-white/10">Food</Button>
+            <Button variant="outline" className="border-white/10">Snacks</Button>
           </div>
-        ))}
+          <Button 
+            variant="outline" 
+            className="border-primary/50 text-primary relative"
+            onClick={() => setShowCart(!showCart)}
+            data-testid="button-toggle-cart"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            View Cart
+            {cartItemCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-primary text-white text-xs">
+                {cartItemCount}
+              </Badge>
+            )}
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {foodMenu.map((item) => (
+            <div 
+              key={item.id} 
+              className="bg-card border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all group"
+              data-testid={`card-menu-${item.id}`}
+            >
+              <div className="h-24 w-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Utensils className="h-10 w-10 text-primary/80" />
+              </div>
+              <h3 className="font-bold text-white text-center mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
+              <p className="text-sm text-muted-foreground text-center mb-3">{item.category}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-primary font-mono font-bold text-lg">${item.price.toFixed(2)}</p>
+                <Button 
+                  size="sm" 
+                  className="bg-white/5 hover:bg-primary hover:text-white"
+                  onClick={() => addToCart(item)}
+                  data-testid={`button-add-${item.id}`}
+                >
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {showCart && (
+        <div className="w-80 shrink-0 bg-card border border-border/50 rounded-xl p-4 h-fit sticky top-0" data-testid="cart-panel">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-primary" />
+              Your Cart
+            </h3>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-8 w-8 text-muted-foreground"
+              onClick={() => setShowCart(false)}
+              data-testid="button-close-cart"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {cart.length === 0 ? (
+            <div className="text-center py-8">
+              <ShoppingCart className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-muted-foreground">Your cart is empty</p>
+              <p className="text-sm text-muted-foreground/60">Add items from the menu</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar">
+                {cart.map((item) => (
+                  <div key={item.id} className="bg-background/50 rounded-lg p-3" data-testid={`cart-item-${item.id}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-white text-sm">{item.name}</span>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeFromCart(item.id)}
+                        data-testid={`button-remove-${item.id}`}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          className="h-6 w-6 border-white/10"
+                          onClick={() => updateQuantity(item.id, -1)}
+                          disabled={item.quantity <= 1}
+                          data-testid={`button-decrease-${item.id}`}
+                        >
+                          -
+                        </Button>
+                        <span className="text-white font-mono w-6 text-center">{item.quantity}</span>
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          className="h-6 w-6 border-white/10"
+                          onClick={() => updateQuantity(item.id, 1)}
+                          data-testid={`button-increase-${item.id}`}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      <span className="text-primary font-mono font-bold">${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-border/50 mt-4 pt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-muted-foreground">Total</span>
+                  <span className="text-xl font-mono font-bold text-primary">${cartTotal.toFixed(2)}</span>
+                </div>
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-bold"
+                  onClick={handleCheckout}
+                  data-testid="button-checkout"
+                >
+                  Place Order
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
