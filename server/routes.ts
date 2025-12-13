@@ -79,6 +79,56 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  // Terminal Session (for Tauri client)
+  app.get("/api/terminals/:id/session", async (req, res) => {
+    const terminal = await storage.getTerminal(req.params.id);
+    if (!terminal) {
+      return res.json({
+        active: false,
+        username: "",
+        timeRemaining: 0,
+        balance: 0,
+        memberTier: "Guest"
+      });
+    }
+    
+    const sessions = await storage.getActiveSessions();
+    const activeSession = sessions.find(s => s.terminalId === req.params.id);
+    
+    if (!activeSession) {
+      return res.json({
+        active: false,
+        username: "",
+        timeRemaining: 0,
+        balance: 0,
+        memberTier: "Guest"
+      });
+    }
+
+    const member = await storage.getMember(activeSession.memberId);
+    const startTime = new Date(activeSession.startTime).getTime();
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const timeRemaining = Math.max(0, 7200 - elapsed);
+
+    res.json({
+      active: true,
+      username: member?.username || "Guest",
+      timeRemaining,
+      balance: parseFloat(member?.balance || "0"),
+      memberTier: member?.tier || "Bronze"
+    });
+  });
+
+  // Orders (for Tauri client food orders)
+  app.post("/api/orders", async (req, res) => {
+    const { terminalId, item, price } = req.body;
+    await storage.createActivityLog({ 
+      type: "order", 
+      message: `Order placed: ${item} ($${price}) from terminal ${terminalId}` 
+    });
+    res.status(201).json({ success: true, message: "Order placed" });
+  });
+
   // Games
   app.get("/api/games", async (_req, res) => {
     const games = await storage.getGames();
