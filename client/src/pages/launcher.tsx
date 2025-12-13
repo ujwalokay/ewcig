@@ -42,16 +42,16 @@ const adSlides = [
   }
 ];
 
-// Mock Data
+// Mock Data with real game images
 const games = [
-  { id: 1, name: "Valorant", category: "FPS", image: "https://images.unsplash.com/photo-1624138784181-dc7f5b75e52d?q=80&w=1000&auto=format&fit=crop" },
-  { id: 2, name: "League of Legends", category: "MOBA", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop" },
-  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?q=80&w=1000&auto=format&fit=crop" },
-  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://images.unsplash.com/photo-1542751110-97427bbecf20?q=80&w=1000&auto=format&fit=crop" },
-  { id: 5, name: "Dota 2", category: "MOBA", image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1000&auto=format&fit=crop" },
-  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://images.unsplash.com/photo-1589241062272-c0a000071964?q=80&w=1000&auto=format&fit=crop" },
-  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://images.unsplash.com/photo-1607522370275-f14206abe5d3?q=80&w=1000&auto=format&fit=crop" },
-  { id: 8, name: "Rocket League", category: "Sports", image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1000&auto=format&fit=crop" },
+  { id: 1, name: "Valorant", category: "FPS", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/47d4f2b0289568b8133ff9dba1a7e4e7e46e6bb0-1920x1080.jpg" },
+  { id: 2, name: "League of Legends", category: "MOBA", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/9bda7e24d92e7c53a8b3f8c3e7d1ea3e2cd5c3e5-1920x1080.jpg" },
+  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://cdn.akamai.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg" },
+  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://media.contentapi.ea.com/content/dam/apex-legends/common/articles/apex-legends-arsenal-background.jpg.adapt.crop16x9.1023w.jpg" },
+  { id: 5, name: "Dota 2", category: "MOBA", image: "https://cdn.akamai.steamstatic.com/apps/dota2/images/dota_react/social_og.jpg" },
+  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://cdn2.unrealengine.com/fortnite-chapter-4-season-og-social-share-1920x1080-0a9c34ea2604.jpg" },
+  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Games_Subnav_702x394.jpg" },
+  { id: 8, name: "Rocket League", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/252950/header.jpg" },
 ];
 
 const foodMenu = [
@@ -174,34 +174,34 @@ export default function Launcher() {
           </div>
         </div>
 
-        {/* Ads Section - Full Screen */}
-        <div className="relative z-20 flex-1 flex items-center justify-center p-4">
-          <div className="w-full h-full">
-            {/* Main Ad Banner - Full Size */}
+        {/* Ads Section - 16:9 Ratio */}
+        <div className="relative z-20 flex-1 flex items-start justify-center px-8 pt-4">
+          <div className="w-full max-w-5xl">
+            {/* Main Ad Banner - 16:9 Aspect Ratio */}
             <div 
               className={cn(
-                "relative h-full w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500",
+                "relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500",
                 `bg-gradient-to-br ${currentAd.gradient}`
               )}
             >
               <div className="absolute inset-0 bg-black/20" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
-                <Badge className="mb-6 bg-white/20 text-white border-white/30 uppercase tracking-wider text-sm px-4 py-1">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                <Badge className="mb-4 bg-white/20 text-white border-white/30 uppercase tracking-wider text-xs px-3 py-1">
                   Featured
                 </Badge>
-                <h2 className="text-7xl font-bold text-white mb-4 drop-shadow-lg">
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
                   {currentAd.title}
                 </h2>
-                <p className="text-3xl text-white/90 font-semibold mb-4">
+                <p className="text-xl md:text-2xl text-white/90 font-semibold mb-2">
                   {currentAd.subtitle}
                 </p>
-                <p className="text-xl text-white/70 max-w-2xl">
+                <p className="text-base text-white/70 max-w-xl">
                   {currentAd.description}
                 </p>
               </div>
               
               {/* Ad Navigation Dots */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                 {adSlides.map((_, index) => (
                   <button
                     key={index}
@@ -209,7 +209,7 @@ export default function Launcher() {
                     className={cn(
                       "h-2 rounded-full transition-all duration-300",
                       index === currentAdIndex 
-                        ? "w-8 bg-white" 
+                        ? "w-6 bg-white" 
                         : "w-2 bg-white/40 hover:bg-white/60"
                     )}
                     data-testid={`ad-dot-${index}`}
@@ -500,12 +500,11 @@ function HomeContent({ onLaunch, onOrder }: { onLaunch: (name: string) => void; 
               onClick={() => onLaunch(game.name)}
               data-testid={`card-game-${game.id}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 group-hover:scale-110 transition-transform duration-500">
-                <div className="flex items-center justify-center h-full text-white/5 font-display font-bold text-3xl rotate-12 uppercase">
-                  {game.category}
-                </div>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+              <div 
+                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
+                style={{ backgroundImage: `url(${game.image})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
               <div className="absolute bottom-0 left-0 p-3 w-full">
                 <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
                 <h4 className="text-white font-bold text-sm leading-tight group-hover:text-primary transition-colors">{game.name}</h4>
@@ -576,12 +575,11 @@ function GamesContent({ onLaunch }: { onLaunch: (name: string) => void }) {
             onClick={() => onLaunch(game.name)}
             data-testid={`card-game-library-${game.id}`}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 group-hover:scale-110 transition-transform duration-500">
-              <div className="flex items-center justify-center h-full text-white/5 font-display font-bold text-4xl rotate-12 uppercase">
-                {game.category}
-              </div>
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+            <div 
+              className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
+              style={{ backgroundImage: `url(${game.image})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
             <div className="absolute bottom-0 left-0 p-4 w-full">
               <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
               <h4 className="text-white font-bold text-lg leading-tight group-hover:text-primary transition-colors">{game.name}</h4>
