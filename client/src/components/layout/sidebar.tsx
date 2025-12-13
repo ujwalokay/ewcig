@@ -84,9 +84,11 @@ export function Sidebar() {
             <p className="text-sm font-medium text-white truncate">Admin Console</p>
             <p className="text-xs text-green-500">System Online</p>
           </div>
-          <button className="text-muted-foreground hover:text-white">
-            <LogOut className="h-5 w-5" />
-          </button>
+          <Link href="/login">
+            <button className="text-muted-foreground hover:text-white" title="Logout">
+              <LogOut className="h-5 w-5" />
+            </button>
+          </Link>
         </div>
       </div>
     </div>

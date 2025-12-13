@@ -12,10 +12,12 @@ import Store from "@/pages/store";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import ClientGenerator from "@/pages/client-generator";
+import Login from "@/pages/login";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/login" component={Login} />
       <Route path="/" component={Dashboard} />
       <Route path="/terminals" component={Terminals} />
       <Route path="/members" component={Members} />
