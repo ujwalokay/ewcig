@@ -43,6 +43,23 @@ export default function ClientGenerator() {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
+                <Label>Target Terminal</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="bg-background/50 border-white/10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Terminals (Generic Installer)</SelectItem>
+                    <SelectItem value="pc1">PC 1</SelectItem>
+                    <SelectItem value="pc2">PC 2</SelectItem>
+                    <SelectItem value="pc3">PC 3</SelectItem>
+                    <SelectItem value="pc4">PC 4</SelectItem>
+                    <SelectItem value="pc5">PC 5</SelectItem>
+                  </SelectContent>
+                </Select>
+                 <p className="text-xs text-muted-foreground">Select a specific terminal to bake its ID into the config</p>
+              </div>
+              <div className="space-y-2">
                 <Label>Server Hostname / IP</Label>
                 <Input defaultValue="192.168.1.100" className="font-mono bg-background/50 border-white/10" />
               </div>

@@ -8,7 +8,7 @@ import { Power, RotateCcw, Lock, Monitor, Cpu, Wifi } from "lucide-react";
 export default function Terminals() {
   const terminals = Array.from({ length: 15 }, (_, i) => ({
     id: i + 1,
-    name: `PC-${(i + 1).toString().padStart(2, '0')}`,
+    name: `PC ${(i + 1)}`,
     status: i % 4 === 0 ? "Occupied" : i % 5 === 0 ? "Offline" : "Available",
     user: i % 4 === 0 ? `User_${i*123}` : "-",
     uptime: i % 5 === 0 ? "-" : `${Math.floor(Math.random() * 48)}h`,

@@ -29,7 +29,7 @@ const terminals: PCTerminal[] = Array.from({ length: 40 }, (_, i) => {
 
   return {
     id: i + 1,
-    name: `PC-${(i + 1).toString().padStart(2, '0')}`,
+    name: `PC ${(i + 1)}`,
     status,
     user: status === "occupied" ? `Player_${Math.floor(Math.random() * 1000)}` : undefined,
     timeRemaining: status === "occupied" ? `${Math.floor(Math.random() * 120)}m` : undefined,
