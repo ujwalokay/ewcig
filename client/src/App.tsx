@@ -11,6 +11,7 @@ import Games from "@/pages/games";
 import Store from "@/pages/store";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import ClientGenerator from "@/pages/client-generator";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/store" component={Store} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={Settings} />
+      <Route path="/client-generator" component={ClientGenerator} />
       <Route component={NotFound} />
     </Switch>
   );
