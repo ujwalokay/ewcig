@@ -117,6 +117,10 @@ export default function Launcher() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const [isGuest, setIsGuest] = useState(false);
+  const [userBalance] = useState(24.50);
+  const [sessionTimeLeft] = useState("02:00:00");
+  const [isUnlimited] = useState(false);
 
   useEffect(() => {
     const adTimer = setInterval(() => {
@@ -279,9 +283,27 @@ export default function Launcher() {
                     <ChevronRight className="h-5 w-5 ml-2" />
                   </Button>
                 </div>
-                <p className="text-white/40 text-sm">
-                  Don't have an account? Ask staff at the front desk to create one.
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-white/40 text-sm">
+                    Don't have an account? Ask staff at the front desk to create one.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    className="border-white/20 text-white/70 hover:text-white hover:bg-white/10"
+                    onClick={() => {
+                      toast({
+                        title: "Guest Login",
+                        description: "Logging in as Guest user...",
+                      });
+                      setIsGuest(true);
+                      setIsLocked(false);
+                    }}
+                    data-testid="button-guest-login"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Login as Guest
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -315,12 +337,27 @@ export default function Launcher() {
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12 border-2 border-primary/30">
-              <AvatarImage src="https://i.pravatar.cc/150?u=gamer123" />
-              <AvatarFallback className="bg-primary text-white">PG</AvatarFallback>
+              {isGuest ? (
+                <AvatarFallback className="bg-gray-600 text-white">
+                  <User className="h-6 w-6" />
+                </AvatarFallback>
+              ) : (
+                <>
+                  <AvatarImage src="https://i.pravatar.cc/150?u=gamer123" />
+                  <AvatarFallback className="bg-primary text-white">PG</AvatarFallback>
+                </>
+              )}
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-display font-bold text-white truncate">ProGamer_99</p>
-              <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/40 text-xs">Gold Member</Badge>
+              <p className="font-display font-bold text-white truncate">
+                {isGuest ? "Guest User" : username || "ProGamer_99"}
+              </p>
+              <Badge className={isGuest 
+                ? "bg-gray-500/20 text-gray-400 border-gray-500/40 text-xs"
+                : "bg-yellow-500/20 text-yellow-500 border-yellow-500/40 text-xs"
+              }>
+                {isGuest ? "Guest" : "Gold Member"}
+              </Badge>
             </div>
           </div>
           
@@ -328,11 +365,18 @@ export default function Launcher() {
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="bg-sidebar-accent/50 rounded-lg p-2 text-center">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Time Left</p>
-              <p className="text-lg font-mono font-bold text-white">02:00:00</p>
+              <p className={cn(
+                "text-lg font-mono font-bold",
+                isUnlimited ? "text-emerald-400" : "text-white"
+              )}>
+                {isUnlimited ? "UNLIMITED" : sessionTimeLeft}
+              </p>
             </div>
             <div className="bg-sidebar-accent/50 rounded-lg p-2 text-center">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Balance</p>
-              <p className="text-lg font-mono font-bold text-emerald-400">$24.50</p>
+              <p className="text-lg font-mono font-bold text-emerald-400">
+                ${userBalance.toFixed(2)}
+              </p>
             </div>
           </div>
         </div>
