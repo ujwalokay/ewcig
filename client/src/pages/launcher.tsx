@@ -175,12 +175,12 @@ export default function Launcher() {
         </div>
 
         {/* Ads Section - 16:9 Ratio */}
-        <div className="relative z-20 flex-1 flex items-start justify-center px-8 pt-4">
-          <div className="w-full max-w-5xl">
+        <div className="relative z-20 flex items-center justify-center px-8 py-4">
+          <div className="w-full max-w-4xl">
             {/* Main Ad Banner - 16:9 Aspect Ratio */}
             <div 
               className={cn(
-                "relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500",
+                "relative w-full aspect-video max-h-[50vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500",
                 `bg-gradient-to-br ${currentAd.gradient}`
               )}
             >
