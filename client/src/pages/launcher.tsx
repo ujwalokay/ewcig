@@ -5,17 +5,42 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   Gamepad2, Clock, DollarSign, ShoppingCart, 
   LogOut, Bell, Wifi, Volume2, Search, Play, 
   Utensils, AlertTriangle, User, Lock, Home,
   Trophy, Settings, HelpCircle, Gift, Users, AppWindow,
   Chrome, Music, Video, FileText, Calculator, Camera, MessageSquare, Mail,
-  X, Minus, Plus, Trash2
+  X, Minus, Plus, Trash2, QrCode, Keyboard, ChevronRight
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import generatedImage from '@assets/generated_images/futuristic_gaming_cafe_interior_concept_art.png';
+
+const adSlides = [
+  {
+    id: 1,
+    title: "Weekend Tournament",
+    subtitle: "5v5 Battle - $500 Prize Pool",
+    description: "Join this Saturday at 6PM. Registration open now!",
+    gradient: "from-orange-600 to-red-600"
+  },
+  {
+    id: 2,
+    title: "Happy Hour Special",
+    subtitle: "50% Off All Energy Drinks",
+    description: "Every day from 3PM - 5PM",
+    gradient: "from-blue-600 to-purple-600"
+  },
+  {
+    id: 3,
+    title: "New Game Alert",
+    subtitle: "Counter-Strike 2 Now Available",
+    description: "Experience the next generation of CS",
+    gradient: "from-green-600 to-teal-600"
+  }
+];
 
 // Mock Data
 const games = [
@@ -42,7 +67,7 @@ type ActiveTab = "home" | "games" | "apps" | "food" | "rewards" | "tournaments" 
 
 export default function Launcher() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isLocked, setIsLocked] = useState(false);
+  const [isLocked, setIsLocked] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>("home");
   const [sessionTime] = useState(120);
 
@@ -89,37 +114,183 @@ export default function Launcher() {
     { id: "help" as const, icon: HelpCircle, label: "Help & Support" },
   ];
 
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
+
+  useEffect(() => {
+    const adTimer = setInterval(() => {
+      setCurrentAdIndex((prev) => (prev + 1) % adSlides.length);
+    }, 5000);
+    return () => clearInterval(adTimer);
+  }, []);
+
+  const handleLogin = () => {
+    if (username && password) {
+      toast({
+        title: "Logging in...",
+        description: `Welcome back, ${username}!`,
+      });
+      setIsLocked(false);
+      setUsername("");
+      setPassword("");
+    } else {
+      toast({
+        title: "Login Required",
+        description: "Please enter your username and password.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLocked) {
+    const currentAd = adSlides[currentAdIndex];
+    
     return (
-      <div className="h-screen w-screen bg-black relative overflow-hidden flex items-center justify-center font-display">
+      <div className="h-screen w-screen bg-black relative overflow-hidden flex flex-col font-display">
+        {/* Background */}
         <div 
-          className="absolute inset-0 opacity-40 blur-sm"
+          className="absolute inset-0 opacity-30"
           style={{ 
             backgroundImage: `url(${generatedImage})`, 
             backgroundSize: 'cover', 
             backgroundPosition: 'center' 
           }} 
         />
-        <div className="absolute inset-0 bg-black/60 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-black z-10" />
         
-        <div className="z-20 text-center space-y-6 animate-in fade-in zoom-in duration-500">
-          <div className="h-24 w-24 bg-primary rounded-xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(255,107,0,0.5)]">
-             <Lock className="h-10 w-10 text-white" />
+        {/* Header */}
+        <div className="relative z-20 flex items-center justify-between px-8 py-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-primary rounded-sm flex items-center justify-center text-white font-bold text-xl skew-x-[-10deg]">
+              G
+            </div>
+            <span className="text-2xl font-bold tracking-wider text-white">GGCIRCUIT</span>
           </div>
-          <h1 className="text-5xl font-bold text-white tracking-widest">TERMINAL LOCKED</h1>
-          <p className="text-xl text-primary font-mono">Session Paused</p>
-          <Button 
-            size="lg" 
-            className="bg-white text-black hover:bg-white/90 font-bold text-lg px-8 py-6 rounded-full"
-            onClick={handleUnlock}
-            data-testid="button-resume-session"
-          >
-            RESUME SESSION
-          </Button>
+          <div className="flex items-center gap-4 text-white/60 font-mono text-sm">
+            <span>PC-08</span>
+            <span>|</span>
+            <span data-testid="text-login-time">{currentTime.toLocaleTimeString()}</span>
+          </div>
+        </div>
+
+        {/* Ads Section - Takes most of the screen */}
+        <div className="relative z-20 flex-1 flex items-center justify-center px-8 py-4">
+          <div className="w-full max-w-5xl">
+            {/* Main Ad Banner */}
+            <div 
+              className={cn(
+                "relative h-[400px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500",
+                `bg-gradient-to-br ${currentAd.gradient}`
+              )}
+            >
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                <Badge className="mb-4 bg-white/20 text-white border-white/30 uppercase tracking-wider">
+                  Featured
+                </Badge>
+                <h2 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">
+                  {currentAd.title}
+                </h2>
+                <p className="text-2xl text-white/90 font-semibold mb-2">
+                  {currentAd.subtitle}
+                </p>
+                <p className="text-lg text-white/70 max-w-md">
+                  {currentAd.description}
+                </p>
+              </div>
+              
+              {/* Ad Navigation Dots */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                {adSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentAdIndex(index)}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-300",
+                      index === currentAdIndex 
+                        ? "w-8 bg-white" 
+                        : "w-2 bg-white/40 hover:bg-white/60"
+                    )}
+                    data-testid={`ad-dot-${index}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Login Section - Bottom */}
+        <div className="relative z-20 bg-black/60 backdrop-blur-xl border-t border-white/10 px-8 py-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-8">
+              {/* QR Code Section */}
+              <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                <div className="h-32 w-32 bg-white rounded-xl p-2 shadow-lg">
+                  <div className="h-full w-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyOSAyOSI+PHBhdGggZD0iTTAgMGgyOXYyOUgweiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xIDFoN3Y3SDFWMXptMSAxdjVoNVYySDJ6bTEgMWgzdjNIM1Yzem04LTJoMXYxaC0xVjF6bTIgMGgydjFoLTFWMmgxVjFoLTJWMHptMyAxaDF2MWgtMVYyem0yLTFoMXYyaC0xVjF6bTIgMGg0djFoLTF2MWgxdjFoLTF2LTFoLTFWMmgtMVYxaC0xVjB6bTcgMGg3djdoLTd6bTEgMXY1aDVWMmgtNXptMSAxaDN2M2gtM1Yzek0xIDloMXYxSDFWOXptMiAwaDJ2MUg0VjloMXYxSDNWOXptMyAwaDF2MUg2Vjl6bTYgMGgxdjFoLTFWOXptNCAwaDJ2MWgtMVYxMGgxVjloLTJ2MXptNS0xaDF2MWgtMVY4em0yIDBoMXYxaC0xVjh6bTEgMGgxdjJoLTF2MWgxdjFoLTFWOXptMiAxaDJ2MWgtMXYxaDF2LTFoMXYyaC0ydi0xaC0xVjl6TTEgMTFoMXYxSDFWMTF6bTIgMGgxdjFoMXYxaC0xdi0xSDN2MWgxdjFINHYxSDNWMTN6bTMgMGgydjFIN3YtMUg2VjExem0zIDBoMXYxaC0xdi0xaDFWMTBIOS4xdi0xaDF2MWgxVjl6bTQgMGgxdjJoLTF2MWgyVjEzaC0xdi0xaDF2LTFoLTJ6bTcgMGgxdjFoLTFWMTF6bS02IDFoMXYxaC0xVjEyem0yIDBoMnYxaC0xdjFoMXYxaC0xdi0xaC0xdi0xaDF6bTQgMGgxdjJoLTF6bTIgMGgxdjFoLTFWMTJ6bS02IDFoMXYxaC0xVjEzem04IDBoMXYxaC0xVjEzem0tMTYgMWgxdjFIN3YtMXptOCAwaDJ2MWgtMXYxaDF2LTFoMXYxaC0xdjFoLTF2LTFoLTFWMTR6bTUgMGgxdjJoMVYxNWgydjFoLTF2MWgxdi0xaDF2MmgtMXYxaC0ydi0xaC0xdi0xaC0xdi0xaDF2LTFoLTFWMTR6bTYgMGgxdjFoLTFWMTR6bS0xNyAxaDF2MWgtMXYtMXptOCAwaDJ2MmgtMnYtMnptNiAwaDFWMTZoMXYxaC0yVjE1em0tMTUgMWgxdjFINHYtMXptNCAwaDJ2MWgxdjFoLTF2MmgtMVYxOEg4VjE3aDFWMTZoLTF6bTMgMGgxdjFoMVYxNmgxdjJoLTJ2LTFoLTFWMTZ6bTYgMGgydjFoLTF2MWgtMXYtMXptNiAwaDJ2MmgtMXYtMWgtMXYtMXptMyAwaDJ2MUgyOHYxaC0xdi0xaC0xdi0xem0zIDBoMXYxaC0xVjE2ek0xIDE3aDd2N0gxVjE3em0xIDF2NWg1VjE4SDJ6bTEgMWgzdjNIM1YxOXptNy0yaDF2MWgtMVYxN3ptMTcgMGg3djdoLTdWMTd6bTEgMXY1aDVWMThoLTV6bTEgMWgzdjNoLTN2LTN6bS04LTFoMXYxaC0xVjE4em0zIDBoMXYxaC0xVjE4em0tNSAxaDJ2MWgtMVYyMGgtMXYtMXptMyAwaDFWMjBoMVYxOWgtMnptMyAxaDF2MWgtMVYyMHptLTQgMWgxdjFoLTFWMjF6bTEgMGgxdjFoLTFWMjF6bTEgMGgxdjFoLTFWMjF6bTMgMGgxdjJoLTF2LTJ6bS0zIDFoMXYxaC0xVjIyem0tMiAxaDF2MWgtMVYyM3ptMSAwaDJ2MWgtMnYtMXptMyAwaDFWMjVoLTF2MWgtMXYtMWgxVjIzem0tNCAzaDF2MWgtMVYyNnptMSAwaDFWMjhoMXYxaC0yVjI2em0yIDBoMXYxaC0xVjI2eiIgZmlsbD0iIzAwMCIvPjwvc3ZnPg==')] bg-contain bg-no-repeat bg-center" />
+                </div>
+                <p className="text-sm text-white/60 flex items-center gap-2">
+                  <QrCode className="h-4 w-4" />
+                  Scan to Login
+                </p>
+              </div>
+
+              {/* Divider */}
+              <div className="flex-shrink-0 flex flex-col items-center gap-2">
+                <div className="h-20 w-px bg-white/20" />
+                <span className="text-white/40 text-sm">or</span>
+                <div className="h-20 w-px bg-white/20" />
+              </div>
+
+              {/* Login Form */}
+              <div className="flex-1 space-y-4">
+                <div className="flex items-center gap-2 text-white mb-4">
+                  <Keyboard className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Login with Username</span>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-primary"
+                      data-testid="input-username"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                      className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-primary"
+                      data-testid="input-password"
+                    />
+                  </div>
+                  <Button 
+                    size="lg"
+                    className="h-12 px-8 bg-primary text-white font-bold"
+                    onClick={handleLogin}
+                    data-testid="button-login"
+                  >
+                    LOGIN
+                    <ChevronRight className="h-5 w-5 ml-2" />
+                  </Button>
+                </div>
+                <p className="text-white/40 text-sm">
+                  Don't have an account? Ask staff at the front desk to create one.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
         
-        <div className="absolute bottom-8 left-8 z-20 text-white/50 font-mono">
-           PC-08 | GGCIRCUIT CLIENT v2.4
+        {/* Footer */}
+        <div className="relative z-20 px-8 py-3 flex items-center justify-between text-white/40 text-xs font-mono bg-black/40">
+          <span>PC-08 | GGCIRCUIT CLIENT v2.4</span>
+          <span>Need help? Call staff or press F1</span>
         </div>
       </div>
     );
