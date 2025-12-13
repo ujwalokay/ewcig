@@ -30,48 +30,48 @@ export function Sidebar() {
           Main Menu
         </div>
         {navItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <a
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 group relative overflow-hidden",
-                location === item.href
-                  ? "bg-sidebar-primary/10 text-primary font-medium"
-                  : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
-              )}
-            >
+          <Link 
+            key={item.href} 
+            href={item.href}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 group relative overflow-hidden",
+              location === item.href
+                ? "bg-sidebar-primary/10 text-primary font-medium"
+                : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
+            )}
+          >
               {location === item.href && (
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(255,107,0,0.5)]" />
               )}
               <item.icon className={cn("h-5 w-5", location === item.href ? "text-primary" : "group-hover:text-white")} />
               <span>{item.label}</span>
-            </a>
           </Link>
         ))}
 
         <div className="mt-8 px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           System
         </div>
-        <Link href="/client-generator">
-          <a
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 group relative overflow-hidden",
-              location === "/client-generator"
-                ? "bg-sidebar-primary/10 text-primary font-medium"
-                : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
-            )}
-          >
+        <Link 
+          href="/client-generator"
+          className={cn(
+            "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 group relative overflow-hidden",
+            location === "/client-generator"
+              ? "bg-sidebar-primary/10 text-primary font-medium"
+              : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
+          )}
+        >
              {location === "/client-generator" && (
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(255,107,0,0.5)]" />
               )}
             <FileCode className={cn("h-5 w-5", location === "/client-generator" ? "text-primary" : "group-hover:text-white")} />
             <span>Client Generator</span>
-          </a>
         </Link>
-        <Link href="/settings">
-          <a className="flex items-center gap-3 px-3 py-2.5 rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-white transition-colors">
+        <Link 
+          href="/settings"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-white transition-colors"
+        >
             <Settings className="h-5 w-5" />
             <span>Settings</span>
-          </a>
         </Link>
       </div>
 
