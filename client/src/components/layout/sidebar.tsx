@@ -73,6 +73,14 @@ export function Sidebar() {
             <Settings className="h-5 w-5" />
             <span>Settings</span>
         </Link>
+        <Link 
+          href="/launcher"
+          target="_blank"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-white transition-colors"
+        >
+            <Monitor className="h-5 w-5" />
+            <span>User View (Launcher)</span>
+        </Link>
       </div>
 
       <div className="p-4 border-t border-sidebar-border">
