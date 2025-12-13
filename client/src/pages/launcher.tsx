@@ -9,7 +9,8 @@ import {
   Gamepad2, Clock, DollarSign, ShoppingCart, 
   LogOut, Bell, Wifi, Volume2, Search, Play, 
   Utensils, AlertTriangle, User, Lock, Home,
-  Trophy, Settings, HelpCircle, Gift, Users
+  Trophy, Settings, HelpCircle, Gift, Users, AppWindow,
+  Chrome, Music, Video, FileText, Calculator, Camera, MessageSquare, Mail
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -36,7 +37,7 @@ const foodMenu = [
   { id: 6, name: "Hot Dog", price: 4.50, category: "Food" },
 ];
 
-type ActiveTab = "home" | "games" | "food" | "rewards" | "tournaments" | "friends" | "profile" | "settings" | "help";
+type ActiveTab = "home" | "games" | "apps" | "food" | "rewards" | "tournaments" | "friends" | "profile" | "settings" | "help";
 
 export default function Launcher() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -74,6 +75,7 @@ export default function Launcher() {
   const sidebarItems = [
     { id: "home" as const, icon: Home, label: "Home" },
     { id: "games" as const, icon: Gamepad2, label: "Game Library" },
+    { id: "apps" as const, icon: AppWindow, label: "Apps" },
     { id: "food" as const, icon: Utensils, label: "Food & Drinks" },
     { id: "rewards" as const, icon: Gift, label: "Rewards" },
     { id: "tournaments" as const, icon: Trophy, label: "Tournaments" },
@@ -271,6 +273,7 @@ export default function Launcher() {
           <div className="relative z-10">
             {activeTab === "home" && <HomeContent onLaunch={handleLaunch} onOrder={handleOrder} />}
             {activeTab === "games" && <GamesContent onLaunch={handleLaunch} />}
+            {activeTab === "apps" && <AppsContent />}
             {activeTab === "food" && <FoodContent onOrder={handleOrder} />}
             {activeTab === "rewards" && <RewardsContent />}
             {activeTab === "tournaments" && <TournamentsContent />}
@@ -660,6 +663,85 @@ function SettingsContent() {
             </div>
             <Button variant="outline" size="sm">Off</Button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Apps Content
+function AppsContent() {
+  const apps = [
+    { id: 1, name: "Chrome", description: "Web Browser", icon: Chrome, category: "Browsers", color: "bg-blue-500/20" },
+    { id: 2, name: "Spotify", description: "Music Streaming", icon: Music, category: "Entertainment", color: "bg-green-500/20" },
+    { id: 3, name: "Discord", description: "Voice & Text Chat", icon: MessageSquare, category: "Communication", color: "bg-indigo-500/20" },
+    { id: 4, name: "YouTube", description: "Video Streaming", icon: Video, category: "Entertainment", color: "bg-red-500/20" },
+    { id: 5, name: "Notepad++", description: "Text Editor", icon: FileText, category: "Productivity", color: "bg-purple-500/20" },
+    { id: 6, name: "Calculator", description: "Quick Math", icon: Calculator, category: "Utilities", color: "bg-gray-500/20" },
+    { id: 7, name: "OBS Studio", description: "Screen Recording", icon: Camera, category: "Streaming", color: "bg-zinc-500/20" },
+    { id: 8, name: "Gmail", description: "Email Client", icon: Mail, category: "Communication", color: "bg-red-400/20" },
+  ];
+
+  const handleLaunchApp = (appName: string) => {
+    toast({
+      title: "Launching App",
+      description: `Opening ${appName}...`,
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 flex-wrap">
+        <Button className="bg-primary text-white">All Apps</Button>
+        <Button variant="outline" className="border-white/10">Browsers</Button>
+        <Button variant="outline" className="border-white/10">Entertainment</Button>
+        <Button variant="outline" className="border-white/10">Communication</Button>
+        <Button variant="outline" className="border-white/10">Productivity</Button>
+        <Button variant="outline" className="border-white/10">Utilities</Button>
+        <Button variant="outline" className="border-white/10">Streaming</Button>
+      </div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {apps.map((app) => (
+          <div 
+            key={app.id} 
+            className="bg-card border border-border/50 rounded-xl p-6 hover:border-primary/50 cursor-pointer transition-all group"
+            onClick={() => handleLaunchApp(app.name)}
+            data-testid={`card-app-${app.id}`}
+          >
+            <div className={cn("h-16 w-16 mx-auto rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform", app.color)}>
+              <app.icon className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="font-bold text-white text-center mb-1 group-hover:text-primary transition-colors">{app.name}</h3>
+            <p className="text-sm text-muted-foreground text-center mb-3">{app.description}</p>
+            <Badge variant="secondary" className="w-full justify-center text-xs">{app.category}</Badge>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Launch Section */}
+      <div className="mt-8">
+        <h3 className="text-xl font-display font-bold text-white mb-4 flex items-center gap-2">
+          <Clock className="h-5 w-5 text-primary" />
+          Recently Used
+        </h3>
+        <div className="flex gap-4 flex-wrap">
+          {apps.slice(0, 4).map((app) => (
+            <div 
+              key={app.id}
+              className="flex items-center gap-3 bg-card/50 border border-white/5 rounded-lg px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors group"
+              onClick={() => handleLaunchApp(app.name)}
+              data-testid={`quick-app-${app.id}`}
+            >
+              <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", app.color)}>
+                <app.icon className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-white font-medium group-hover:text-primary transition-colors">{app.name}</p>
+                <p className="text-xs text-muted-foreground">{app.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
