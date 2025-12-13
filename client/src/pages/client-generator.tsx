@@ -45,7 +45,7 @@ export default function ClientGenerator() {
               <div className="space-y-2">
                 <Label>Target Terminal</Label>
                 <Select defaultValue="all">
-                  <SelectTrigger className="bg-background/50 border-white/10">
+                  <SelectTrigger className="bg-background/50 border-white/10" data-testid="select-target-terminal">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -55,9 +55,14 @@ export default function ClientGenerator() {
                     <SelectItem value="pc3">PC 3</SelectItem>
                     <SelectItem value="pc4">PC 4</SelectItem>
                     <SelectItem value="pc5">PC 5</SelectItem>
+                    <SelectItem value="pc6">PC 6</SelectItem>
+                    <SelectItem value="pc7">PC 7</SelectItem>
+                    <SelectItem value="pc8">PC 8</SelectItem>
+                    <SelectItem value="pc9">PC 9</SelectItem>
+                    <SelectItem value="pc10">PC 10</SelectItem>
                   </SelectContent>
                 </Select>
-                 <p className="text-xs text-muted-foreground">Select a specific terminal to bake its ID into the config</p>
+                 <p className="text-xs text-muted-foreground">Select a specific terminal to bake its ID into the config (Maximum 10 PCs)</p>
               </div>
               <div className="space-y-2">
                 <Label>Server Hostname / IP</Label>
