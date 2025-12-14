@@ -44,14 +44,18 @@ const adSlides = [
 
 // Mock Data with real game images
 const games = [
-  { id: 1, name: "Valorant", category: "FPS", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/47d4f2b0289568b8133ff9dba1a7e4e7e46e6bb0-1920x1080.jpg" },
-  { id: 2, name: "League of Legends", category: "MOBA", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/9bda7e24d92e7c53a8b3f8c3e7d1ea3e2cd5c3e5-1920x1080.jpg" },
-  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://cdn.akamai.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg" },
-  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://media.contentapi.ea.com/content/dam/apex-legends/common/articles/apex-legends-arsenal-background.jpg.adapt.crop16x9.1023w.jpg" },
-  { id: 5, name: "Dota 2", category: "MOBA", image: "https://cdn.akamai.steamstatic.com/apps/dota2/images/dota_react/social_og.jpg" },
-  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://cdn2.unrealengine.com/fortnite-chapter-4-season-og-social-share-1920x1080-0a9c34ea2604.jpg" },
-  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Games_Subnav_702x394.jpg" },
-  { id: 8, name: "Rocket League", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/252950/header.jpg" },
+  { id: 1, name: "Valorant", category: "FPS", image: "https://images.contentstack.io/v3/assets/bltb6530b271fddd0b1/blt3f072336e3f3ade4/63096d7be4a8c30e088e7720/Valorant_2022_E5A2_PlayVALORANT_ContentStackThumbnail_1200x625_MB01.png" },
+  { id: 2, name: "League of Legends", category: "MOBA", image: "https://images.contentstack.io/v3/assets/blt731acb42bb3d1659/blt9a2715ced150db6c/5db05f4e02ac7e6862e9ac1a/league-of-legends-og-image.jpg" },
+  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/730/header.jpg" },
+  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://media.contentapi.ea.com/content/dam/apex-legends/images/2019/01/apex-featured-image-16x9.jpg.adapt.crop16x9.1023w.jpg" },
+  { id: 5, name: "Dota 2", category: "MOBA", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/570/header.jpg" },
+  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://cdn2.unrealengine.com/blade-702x390-702x390-e14e42b8e938.jpg" },
+  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Vanilla-PMP_Collection-702x394.jpg" },
+  { id: 8, name: "Rocket League", category: "Sports", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/252950/header.jpg" },
+  { id: 9, name: "GTA V", category: "Action", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg" },
+  { id: 10, name: "PUBG", category: "Battle Royale", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/578080/header.jpg" },
+  { id: 11, name: "Overwatch 2", category: "FPS", image: "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt01010c1e12763129/62ea8957e5e7e42300b213bb/OVR_S1_KeyArt_Banner.jpg" },
+  { id: 12, name: "FIFA 24", category: "Sports", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2195250/header.jpg" },
 ];
 
 const foodMenu = [
@@ -65,9 +69,19 @@ const foodMenu = [
 
 type ActiveTab = "home" | "games" | "apps" | "food" | "rewards" | "tournaments" | "friends" | "profile" | "settings" | "help";
 
+// Session time options with pricing
+const sessionOptions = [
+  { id: 1, hours: 1, price: 5.00, label: "1 Hour" },
+  { id: 2, hours: 2, price: 9.00, label: "2 Hours" },
+  { id: 3, hours: 3, price: 12.00, label: "3 Hours" },
+  { id: 4, hours: 5, price: 18.00, label: "5 Hours" },
+  { id: 5, hours: 0, price: 25.00, label: "Unlimited", isUnlimited: true },
+];
+
 export default function Launcher() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isLocked, setIsLocked] = useState(true);
+  const [showSessionSelection, setShowSessionSelection] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>("home");
   const [sessionTime] = useState(120);
 
@@ -116,11 +130,12 @@ export default function Launcher() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loggedInUser, setLoggedInUser] = useState("");
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
   const [userBalance] = useState(24.50);
-  const [sessionTimeLeft] = useState("02:00:00");
-  const [isUnlimited] = useState(false);
+  const [sessionTimeLeft, setSessionTimeLeft] = useState("02:00:00");
+  const [isUnlimited, setIsUnlimited] = useState(false);
 
   useEffect(() => {
     const adTimer = setInterval(() => {
@@ -135,9 +150,9 @@ export default function Launcher() {
         title: "Logging in...",
         description: `Welcome back, ${username}!`,
       });
+      setLoggedInUser(username);
+      setShowSessionSelection(true);
       setIsLocked(false);
-      setUsername("");
-      setPassword("");
     } else {
       toast({
         title: "Login Required",
@@ -146,6 +161,146 @@ export default function Launcher() {
       });
     }
   };
+
+  const handleSessionSelect = (option: typeof sessionOptions[0]) => {
+    toast({
+      title: "Session Started",
+      description: option.isUnlimited 
+        ? "Unlimited gaming time activated!" 
+        : `${option.hours} hour(s) session started. Enjoy!`,
+    });
+    setIsUnlimited(option.isUnlimited || false);
+    if (!option.isUnlimited && option.hours > 0) {
+      const h = String(option.hours).padStart(2, '0');
+      setSessionTimeLeft(`${h}:00:00`);
+    }
+    setShowSessionSelection(false);
+    setUsername("");
+    setPassword("");
+  };
+
+  // Session Selection Screen
+  if (showSessionSelection) {
+    return (
+      <div className="h-screen w-screen bg-black relative overflow-hidden flex flex-col font-display">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{ 
+            backgroundImage: `url(${generatedImage})`, 
+            backgroundSize: 'cover', 
+            backgroundPosition: 'center' 
+          }} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/90 to-black z-10" />
+        
+        {/* Header */}
+        <div className="relative z-20 flex items-center justify-between px-8 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-primary rounded-sm flex items-center justify-center text-white font-bold text-xl skew-x-[-10deg]">
+              G
+            </div>
+            <span className="text-2xl font-bold tracking-wider text-white">GGCIRCUIT</span>
+          </div>
+          <div className="flex items-center gap-4 text-white/60 font-mono text-sm">
+            <span>PC-08</span>
+            <span>|</span>
+            <span>{currentTime.toLocaleTimeString()}</span>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="relative z-20 flex-1 flex flex-col items-center justify-center px-8 py-6">
+          {/* User Profile Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8 w-full max-w-md">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16 border-2 border-primary/50">
+                <AvatarImage src="https://i.pravatar.cc/150?u=gamer123" />
+                <AvatarFallback className="bg-primary text-white text-xl">
+                  {loggedInUser ? loggedInUser.slice(0, 2).toUpperCase() : "PG"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-white">{loggedInUser || "ProGamer_99"}</h2>
+                <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/40 text-xs mt-1">
+                  Gold Member
+                </Badge>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-white/50 uppercase tracking-wider">Balance</p>
+                <p className="text-2xl font-mono font-bold text-emerald-400">${userBalance.toFixed(2)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Session Selection */}
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-white mb-2">Select Your Session</h1>
+            <p className="text-white/60">Choose how long you want to play</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full max-w-4xl">
+            {sessionOptions.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => handleSessionSelect(option)}
+                data-testid={`button-session-${option.id}`}
+                className={cn(
+                  "relative bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 text-center transition-all hover:border-primary/50 hover:bg-white/10 group",
+                  option.isUnlimited && "md:col-span-1 border-primary/30 bg-primary/5"
+                )}
+              >
+                {option.isUnlimited && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-primary text-white text-xs">Best Value</Badge>
+                  </div>
+                )}
+                <div className={cn(
+                  "h-12 w-12 rounded-full mx-auto mb-3 flex items-center justify-center",
+                  option.isUnlimited ? "bg-primary/20" : "bg-white/10"
+                )}>
+                  <Clock className={cn(
+                    "h-6 w-6",
+                    option.isUnlimited ? "text-primary" : "text-white/60"
+                  )} />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
+                  {option.label}
+                </h3>
+                <p className="text-2xl font-mono font-bold text-primary">${option.price.toFixed(2)}</p>
+                {!option.isUnlimited && (
+                  <p className="text-xs text-white/40 mt-1">${(option.price / option.hours).toFixed(2)}/hr</p>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Balance Warning */}
+          {userBalance < 5 && (
+            <div className="mt-6 flex items-center gap-2 text-yellow-500 bg-yellow-500/10 px-4 py-2 rounded-lg">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm">Low balance! Please add funds at the front desk.</span>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="relative z-20 px-8 py-4 flex items-center justify-between text-white/40 text-xs font-mono bg-black/40 border-t border-white/10">
+          <span>PC-08 | GGCIRCUIT CLIENT v2.4</span>
+          <Button 
+            variant="ghost" 
+            className="text-white/60 hover:text-white"
+            onClick={() => {
+              setShowSessionSelection(false);
+              setIsLocked(true);
+            }}
+            data-testid="button-cancel-session"
+          >
+            Cancel & Lock Terminal
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLocked) {
     const currentAd = adSlides[currentAdIndex];
@@ -350,7 +505,7 @@ export default function Launcher() {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="font-display font-bold text-white truncate">
-                {isGuest ? "Guest User" : username || "ProGamer_99"}
+                {isGuest ? "Guest User" : loggedInUser || "ProGamer_99"}
               </p>
               <Badge className={isGuest 
                 ? "bg-gray-500/20 text-gray-400 border-gray-500/40 text-xs"
