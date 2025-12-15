@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useTauriGames, type GameInfo } from "@/hooks/use-tauri-games";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -800,28 +801,144 @@ function HomeContent({ onLaunch, onOrder }: { onLaunch: (name: string) => void; 
 }
 
 // Games Content
-function GamesContent({ onLaunch }: { onLaunch: (name: string) => void }) {
+function GamesContent({ onLaunch }: { onLaunch: (name: string, execPath?: string | null) => void }) {
+  const { games: tauriGames, isScanning, isTauriApp, scanForGames, launchGame } = useTauriGames();
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [showInstalledOnly, setShowInstalledOnly] = useState(false);
+  
+  const categories = ["FPS", "MOBA", "Battle Royale", "Sports", "Sandbox", "Action"];
+  
+  const filteredGames = tauriGames.filter(game => {
+    if (filterCategory && game.category !== filterCategory) return false;
+    if (showInstalledOnly && !game.is_installed) return false;
+    return true;
+  });
+
+  const handleGameLaunch = async (game: GameInfo) => {
+    if (isTauriApp && game.is_installed && game.executable_path) {
+      const result = await launchGame(game.id, game.executable_path);
+      if (result.success) {
+        onLaunch(game.name, game.executable_path);
+      }
+    } else {
+      onLaunch(game.name);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 flex-wrap">
-        <Button className="bg-primary text-white">All Games</Button>
-        <Button variant="outline" className="border-white/10">FPS</Button>
-        <Button variant="outline" className="border-white/10">MOBA</Button>
-        <Button variant="outline" className="border-white/10">Battle Royale</Button>
-        <Button variant="outline" className="border-white/10">Sports</Button>
-        <Button variant="outline" className="border-white/10">Sandbox</Button>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-4 flex-wrap">
+          <Button 
+            className={filterCategory === null ? "bg-primary text-white" : ""}
+            variant={filterCategory === null ? "default" : "outline"}
+            onClick={() => setFilterCategory(null)}
+          >
+            All Games
+          </Button>
+          {categories.map(cat => (
+            <Button 
+              key={cat}
+              variant={filterCategory === cat ? "default" : "outline"} 
+              className={filterCategory === cat ? "bg-primary text-white" : "border-white/10"}
+              onClick={() => setFilterCategory(cat)}
+            >
+              {cat}
+            </Button>
+          ))}
+        </div>
+        {isTauriApp && (
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              className="border-white/10"
+              onClick={() => setShowInstalledOnly(!showInstalledOnly)}
+            >
+              {showInstalledOnly ? "Show All" : "Installed Only"}
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-primary/50 text-primary"
+              onClick={scanForGames}
+              disabled={isScanning}
+            >
+              {isScanning ? "Scanning..." : "Scan for Games"}
+            </Button>
+          </div>
+        )}
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {games.map((game) => (
-          <GameCard 
+        {filteredGames.map((game) => (
+          <TauriGameCard 
             key={game.id} 
             game={game} 
-            onLaunch={onLaunch}
-            size="large"
-            testIdPrefix="card-game-library"
+            onLaunch={() => handleGameLaunch(game)}
+            isTauriApp={isTauriApp}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function TauriGameCard({ game, onLaunch, isTauriApp }: { game: GameInfo; onLaunch: () => void; isTauriApp: boolean }) {
+  const [imgSrc, setImgSrc] = useState(game.image_url);
+  const [hasError, setHasError] = useState(false);
+
+  const handleImageError = () => {
+    if (!hasError) {
+      setHasError(true);
+      setImgSrc(generatedImage);
+    }
+  };
+
+  return (
+    <div 
+      className={cn(
+        "group relative aspect-[3/4] bg-card rounded-xl overflow-hidden border shadow-lg transition-all cursor-pointer",
+        game.is_installed 
+          ? "border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+          : "border-white/5 hover:border-primary/50 hover:shadow-[0_0_20px_rgba(255,107,0,0.2)]",
+        !game.is_installed && isTauriApp && "opacity-60"
+      )}
+      onClick={onLaunch}
+      data-testid={`card-game-library-${game.id}`}
+    >
+      <img 
+        src={imgSrc}
+        alt={game.name}
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        onError={handleImageError}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
+      
+      {isTauriApp && (
+        <div className="absolute top-2 right-2">
+          <Badge className={game.is_installed 
+            ? "bg-emerald-500/80 text-white border-emerald-400/50 text-xs" 
+            : "bg-gray-500/80 text-white border-gray-400/50 text-xs"
+          }>
+            {game.is_installed ? "Installed" : "Not Found"}
+          </Badge>
+        </div>
+      )}
+      
+      <div className="absolute bottom-0 left-0 w-full p-4">
+        <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
+        <h4 className="text-lg text-white font-bold leading-tight group-hover:text-primary transition-colors">{game.name}</h4>
+        {game.platform && (
+          <p className="text-xs text-white/50 mt-1 capitalize">{game.platform}</p>
+        )}
+      </div>
+      
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
+        <div className={cn(
+          "h-16 w-16 rounded-full flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-transform",
+          game.is_installed ? "bg-emerald-500" : "bg-primary"
+        )}>
+          <Play className="h-8 w-8 text-white ml-1" fill="white" />
+        </div>
       </div>
     </div>
   );
