@@ -42,31 +42,78 @@ const adSlides = [
   }
 ];
 
-// Category-based gradient colors for fallback
-const categoryGradients: Record<string, string> = {
-  "FPS": "from-red-600 to-orange-700",
-  "MOBA": "from-purple-600 to-blue-700",
-  "Battle Royale": "from-green-600 to-teal-700",
-  "Sports": "from-blue-600 to-cyan-700",
-  "Sandbox": "from-amber-600 to-yellow-700",
-  "Action": "from-rose-600 to-pink-700",
-};
+// Default fallback image for games
+const defaultGameImage = generatedImage;
 
-// Mock Data with game images
+// Mock Data with real game images
 const games = [
-  { id: 1, name: "Valorant", category: "FPS" },
-  { id: 2, name: "League of Legends", category: "MOBA" },
-  { id: 3, name: "Counter-Strike 2", category: "FPS" },
-  { id: 4, name: "Apex Legends", category: "Battle Royale" },
-  { id: 5, name: "Dota 2", category: "MOBA" },
-  { id: 6, name: "Fortnite", category: "Battle Royale" },
-  { id: 7, name: "Minecraft", category: "Sandbox" },
-  { id: 8, name: "Rocket League", category: "Sports" },
-  { id: 9, name: "GTA V", category: "Action" },
-  { id: 10, name: "PUBG", category: "Battle Royale" },
-  { id: 11, name: "Overwatch 2", category: "FPS" },
-  { id: 12, name: "FIFA 24", category: "Sports" },
+  { id: 1, name: "Valorant", category: "FPS", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4fd6a11df4eb2c7c8e368e88b78e97ebb00f4688-1920x1080.jpg" },
+  { id: 2, name: "League of Legends", category: "MOBA", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4c44f7838e9c3a6ae8f02fc2f1e5a0ce66e2cf20-1920x1080.jpg" },
+  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg" },
+  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://cdn.akamai.steamstatic.com/steam/apps/1172470/header.jpg" },
+  { id: 5, name: "Dota 2", category: "MOBA", image: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg" },
+  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://cdn2.unrealengine.com/en-eg-desktop-background-1923x1080-1923x1080-828a5d1ebb0f.jpg" },
+  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://cdn.akamai.steamstatic.com/steam/apps/1672970/header.jpg" },
+  { id: 8, name: "Rocket League", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/252950/header.jpg" },
+  { id: 9, name: "GTA V", category: "Action", image: "https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg" },
+  { id: 10, name: "PUBG", category: "Battle Royale", image: "https://cdn.akamai.steamstatic.com/steam/apps/578080/header.jpg" },
+  { id: 11, name: "Overwatch 2", category: "FPS", image: "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt7f4c77fd14dff1c7/646e51bc2d39af49a3c2e0a4/ow2-homepage-hero-bg.webp" },
+  { id: 12, name: "FIFA 24", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/2195250/header.jpg" },
 ];
+
+// Game card component with image fallback
+function GameCard({ 
+  game, 
+  onLaunch, 
+  size = "normal",
+  testIdPrefix = "card-game"
+}: { 
+  game: typeof games[0]; 
+  onLaunch: (name: string) => void;
+  size?: "normal" | "large";
+  testIdPrefix?: string;
+}) {
+  const [imgSrc, setImgSrc] = useState(game.image);
+  const [hasError, setHasError] = useState(false);
+
+  const handleImageError = () => {
+    if (!hasError) {
+      setHasError(true);
+      setImgSrc(defaultGameImage);
+    }
+  };
+
+  const iconSize = size === "large" ? "h-24 w-24" : "h-20 w-20";
+  const textSize = size === "large" ? "text-lg" : "text-sm";
+  const padding = size === "large" ? "p-4" : "p-3";
+  const playBtnSize = size === "large" ? "h-16 w-16" : "h-14 w-14";
+  const playIconSize = size === "large" ? "h-8 w-8" : "h-7 w-7";
+
+  return (
+    <div 
+      className="group relative aspect-[3/4] bg-card rounded-xl overflow-hidden border border-white/5 shadow-lg hover:border-primary/50 hover:shadow-[0_0_20px_rgba(255,107,0,0.2)] transition-all cursor-pointer"
+      onClick={() => onLaunch(game.name)}
+      data-testid={`${testIdPrefix}-${game.id}`}
+    >
+      <img 
+        src={imgSrc}
+        alt={game.name}
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        onError={handleImageError}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
+      <div className={cn("absolute bottom-0 left-0 w-full", padding)}>
+        <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
+        <h4 className={cn("text-white font-bold leading-tight group-hover:text-primary transition-colors", textSize)}>{game.name}</h4>
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
+        <div className={cn("bg-primary rounded-full flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-transform", playBtnSize)}>
+          <Play className={cn("text-white ml-1", playIconSize)} fill="white" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const foodMenu = [
   { id: 1, name: "Red Bull", price: 4.50, category: "Energy" },
@@ -703,30 +750,12 @@ function HomeContent({ onLaunch, onOrder }: { onLaunch: (name: string) => void; 
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {games.slice(0, 5).map((game) => (
-            <div 
+            <GameCard 
               key={game.id} 
-              className="group relative aspect-[3/4] bg-card rounded-xl overflow-hidden border border-white/5 shadow-lg hover:border-primary/50 hover:shadow-[0_0_20px_rgba(255,107,0,0.2)] transition-all cursor-pointer"
-              onClick={() => onLaunch(game.name)}
-              data-testid={`card-game-${game.id}`}
-            >
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-br group-hover:scale-110 transition-transform duration-500",
-                categoryGradients[game.category] || "from-gray-600 to-gray-800"
-              )} />
-              <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                <Gamepad2 className="h-20 w-20 text-white" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
-              <div className="absolute bottom-0 left-0 p-3 w-full">
-                <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
-                <h4 className="text-white font-bold text-sm leading-tight group-hover:text-primary transition-colors">{game.name}</h4>
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-                <div className="h-14 w-14 bg-primary rounded-full flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-transform">
-                  <Play className="h-7 w-7 text-white ml-1" fill="white" />
-                </div>
-              </div>
-            </div>
+              game={game} 
+              onLaunch={onLaunch}
+              testIdPrefix="card-game"
+            />
           ))}
         </div>
       </div>
@@ -781,30 +810,13 @@ function GamesContent({ onLaunch }: { onLaunch: (name: string) => void }) {
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {games.map((game) => (
-          <div 
+          <GameCard 
             key={game.id} 
-            className="group relative aspect-[3/4] bg-card rounded-xl overflow-hidden border border-white/5 shadow-lg hover:border-primary/50 hover:shadow-[0_0_20px_rgba(255,107,0,0.2)] transition-all cursor-pointer"
-            onClick={() => onLaunch(game.name)}
-            data-testid={`card-game-library-${game.id}`}
-          >
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-br group-hover:scale-110 transition-transform duration-500",
-              categoryGradients[game.category] || "from-gray-600 to-gray-800"
-            )} />
-            <div className="absolute inset-0 flex items-center justify-center opacity-30">
-              <Gamepad2 className="h-24 w-24 text-white" />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
-            <div className="absolute bottom-0 left-0 p-4 w-full">
-              <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
-              <h4 className="text-white font-bold text-lg leading-tight group-hover:text-primary transition-colors">{game.name}</h4>
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
-              <div className="h-16 w-16 bg-primary rounded-full flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-transform">
-                <Play className="h-8 w-8 text-white ml-1" fill="white" />
-              </div>
-            </div>
-          </div>
+            game={game} 
+            onLaunch={onLaunch}
+            size="large"
+            testIdPrefix="card-game-library"
+          />
         ))}
       </div>
     </div>
