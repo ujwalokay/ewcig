@@ -42,20 +42,30 @@ const adSlides = [
   }
 ];
 
-// Mock Data with real game images
+// Category-based gradient colors for fallback
+const categoryGradients: Record<string, string> = {
+  "FPS": "from-red-600 to-orange-700",
+  "MOBA": "from-purple-600 to-blue-700",
+  "Battle Royale": "from-green-600 to-teal-700",
+  "Sports": "from-blue-600 to-cyan-700",
+  "Sandbox": "from-amber-600 to-yellow-700",
+  "Action": "from-rose-600 to-pink-700",
+};
+
+// Mock Data with game images
 const games = [
-  { id: 1, name: "Valorant", category: "FPS", image: "https://images.contentstack.io/v3/assets/bltb6530b271fddd0b1/blt3f072336e3f3ade4/63096d7be4a8c30e088e7720/Valorant_2022_E5A2_PlayVALORANT_ContentStackThumbnail_1200x625_MB01.png" },
-  { id: 2, name: "League of Legends", category: "MOBA", image: "https://images.contentstack.io/v3/assets/blt731acb42bb3d1659/blt9a2715ced150db6c/5db05f4e02ac7e6862e9ac1a/league-of-legends-og-image.jpg" },
-  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/730/header.jpg" },
-  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://media.contentapi.ea.com/content/dam/apex-legends/images/2019/01/apex-featured-image-16x9.jpg.adapt.crop16x9.1023w.jpg" },
-  { id: 5, name: "Dota 2", category: "MOBA", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/570/header.jpg" },
-  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://cdn2.unrealengine.com/blade-702x390-702x390-e14e42b8e938.jpg" },
-  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/key-art/Vanilla-PMP_Collection-702x394.jpg" },
-  { id: 8, name: "Rocket League", category: "Sports", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/252950/header.jpg" },
-  { id: 9, name: "GTA V", category: "Action", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg" },
-  { id: 10, name: "PUBG", category: "Battle Royale", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/578080/header.jpg" },
-  { id: 11, name: "Overwatch 2", category: "FPS", image: "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt01010c1e12763129/62ea8957e5e7e42300b213bb/OVR_S1_KeyArt_Banner.jpg" },
-  { id: 12, name: "FIFA 24", category: "Sports", image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2195250/header.jpg" },
+  { id: 1, name: "Valorant", category: "FPS" },
+  { id: 2, name: "League of Legends", category: "MOBA" },
+  { id: 3, name: "Counter-Strike 2", category: "FPS" },
+  { id: 4, name: "Apex Legends", category: "Battle Royale" },
+  { id: 5, name: "Dota 2", category: "MOBA" },
+  { id: 6, name: "Fortnite", category: "Battle Royale" },
+  { id: 7, name: "Minecraft", category: "Sandbox" },
+  { id: 8, name: "Rocket League", category: "Sports" },
+  { id: 9, name: "GTA V", category: "Action" },
+  { id: 10, name: "PUBG", category: "Battle Royale" },
+  { id: 11, name: "Overwatch 2", category: "FPS" },
+  { id: 12, name: "FIFA 24", category: "Sports" },
 ];
 
 const foodMenu = [
@@ -699,10 +709,13 @@ function HomeContent({ onLaunch, onOrder }: { onLaunch: (name: string) => void; 
               onClick={() => onLaunch(game.name)}
               data-testid={`card-game-${game.id}`}
             >
-              <div 
-                className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
-                style={{ backgroundImage: `url(${game.image})` }}
-              />
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-br group-hover:scale-110 transition-transform duration-500",
+                categoryGradients[game.category] || "from-gray-600 to-gray-800"
+              )} />
+              <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                <Gamepad2 className="h-20 w-20 text-white" />
+              </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
               <div className="absolute bottom-0 left-0 p-3 w-full">
                 <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
@@ -774,10 +787,13 @@ function GamesContent({ onLaunch }: { onLaunch: (name: string) => void }) {
             onClick={() => onLaunch(game.name)}
             data-testid={`card-game-library-${game.id}`}
           >
-            <div 
-              className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
-              style={{ backgroundImage: `url(${game.image})` }}
-            />
+            <div className={cn(
+              "absolute inset-0 bg-gradient-to-br group-hover:scale-110 transition-transform duration-500",
+              categoryGradients[game.category] || "from-gray-600 to-gray-800"
+            )} />
+            <div className="absolute inset-0 flex items-center justify-center opacity-30">
+              <Gamepad2 className="h-24 w-24 text-white" />
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
             <div className="absolute bottom-0 left-0 p-4 w-full">
               <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
