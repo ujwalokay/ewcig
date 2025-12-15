@@ -207,6 +207,8 @@ export default function Launcher() {
   const [sessionCost, setSessionCost] = useState(0);
   const [showLogoutSummary, setShowLogoutSummary] = useState(false);
   const [finalSessionData, setFinalSessionData] = useState<{startTime: Date; endTime: Date; totalMinutes: number; totalCost: number} | null>(null);
+  const [showGuestUsernameInput, setShowGuestUsernameInput] = useState(false);
+  const [guestUsername, setGuestUsername] = useState("");
   const hourlyRate = 5.00;
 
   const { data: timePackages = [] } = useQuery<TimePackage[]>({
@@ -344,6 +346,88 @@ export default function Launcher() {
     setSessionStartTime(null);
     setIsLocked(true);
   };
+
+  // Guest Username Input Screen
+  if (showGuestUsernameInput) {
+    return (
+      <div className="h-screen w-screen bg-black relative overflow-hidden flex flex-col font-display">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{ backgroundImage: `url(${generatedImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/90 to-black z-10" />
+        
+        <div className="relative z-20 flex items-center justify-between px-8 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-primary rounded-sm flex items-center justify-center text-white font-bold text-xl skew-x-[-10deg]">G</div>
+            <span className="text-2xl font-bold tracking-wider text-white">GGCIRCUIT</span>
+          </div>
+          <div className="flex items-center gap-4 text-white/60 font-mono text-sm">
+            <span>PC-08</span><span>|</span><span>{currentTime.toLocaleTimeString()}</span>
+          </div>
+        </div>
+        
+        <div className="relative z-20 flex-1 flex flex-col items-center justify-center px-8">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 max-w-md w-full text-center">
+            <div className="h-16 w-16 bg-primary/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <User className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Guest Login</h1>
+            <p className="text-white/60 mb-6">Enter your name to continue</p>
+            
+            <div className="space-y-4">
+              <Input 
+                placeholder="Enter your name"
+                value={guestUsername}
+                onChange={(e) => setGuestUsername(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && guestUsername.trim()) {
+                    setLoggedInUser(guestUsername.trim());
+                    setIsGuest(true);
+                    setShowGuestUsernameInput(false);
+                    setShowSessionSelection(true);
+                  }
+                }}
+                className="h-12 bg-black/30 border-white/20 text-white text-center text-lg"
+                data-testid="input-guest-username"
+              />
+              <Button 
+                className="w-full h-12 bg-primary text-white font-bold"
+                onClick={() => {
+                  if (guestUsername.trim()) {
+                    setLoggedInUser(guestUsername.trim());
+                    setIsGuest(true);
+                    setShowGuestUsernameInput(false);
+                    setShowSessionSelection(true);
+                  } else {
+                    toast({
+                      title: "Name Required",
+                      description: "Please enter your name to continue.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                data-testid="button-guest-continue"
+              >
+                Continue
+              </Button>
+              <Button 
+                variant="ghost"
+                className="w-full text-white/60"
+                onClick={() => {
+                  setShowGuestUsernameInput(false);
+                  setGuestUsername("");
+                }}
+                data-testid="button-guest-cancel"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Logout Summary Screen
   if (showLogoutSummary && finalSessionData) {
@@ -722,12 +806,7 @@ export default function Launcher() {
                     variant="outline"
                     className="border-white/20 text-white/70 hover:text-white hover:bg-white/10"
                     onClick={() => {
-                      toast({
-                        title: "Guest Login",
-                        description: "Logging in as Guest user...",
-                      });
-                      setIsGuest(true);
-                      setIsLocked(false);
+                      setShowGuestUsernameInput(true);
                     }}
                     data-testid="button-guest-login"
                   >
