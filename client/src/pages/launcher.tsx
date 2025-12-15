@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import generatedImage from '@assets/generated_images/futuristic_gaming_cafe_interior_concept_art.png';
+import valorantLogo from '@assets/hd-valorant-official-logo-with-symbol-png-701751694788091hltdw_1765788389732.png';
 
 const adSlides = [
   {
@@ -48,7 +49,7 @@ const defaultGameImage = generatedImage;
 
 // Mock Data with real game images and icons
 const games = [
-  { id: 1, name: "Valorant", category: "FPS", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4fd6a11df4eb2c7c8e368e88b78e97ebb00f4688-1920x1080.jpg", icon: Crosshair },
+  { id: 1, name: "Valorant", category: "FPS", image: valorantLogo, icon: Crosshair },
   { id: 2, name: "League of Legends", category: "MOBA", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4c44f7838e9c3a6ae8f02fc2f1e5a0ce66e2cf20-1920x1080.jpg", icon: Swords },
   { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg", icon: Target },
   { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://cdn.akamai.steamstatic.com/steam/apps/1172470/header.jpg", icon: Flame },
