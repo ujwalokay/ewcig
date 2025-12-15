@@ -72,6 +72,15 @@ export const activityLogs = pgTable("activity_logs", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
+export const timePackages = pgTable("time_packages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  durationHours: integer("duration_hours").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -83,6 +92,7 @@ export const insertGameSchema = createInsertSchema(games).omit({ id: true });
 export const insertStoreItemSchema = createInsertSchema(storeItems).omit({ id: true });
 export const insertSessionSchema = createInsertSchema(sessions).omit({ id: true, startTime: true });
 export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({ id: true, timestamp: true });
+export const insertTimePackageSchema = createInsertSchema(timePackages).omit({ id: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -98,3 +108,5 @@ export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type Session = typeof sessions.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 export type ActivityLog = typeof activityLogs.$inferSelect;
+export type InsertTimePackage = z.infer<typeof insertTimePackageSchema>;
+export type TimePackage = typeof timePackages.$inferSelect;

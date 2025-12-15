@@ -23,6 +23,15 @@ interface SessionData {
   memberTier: string;
 }
 
+interface TimePackage {
+  id: string;
+  name: string;
+  durationHours: number;
+  price: string;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 const games = [
   { id: 1, name: "Valorant", category: "FPS", path: "C:\\Riot Games\\Valorant\\VALORANT.exe" },
   { id: 2, name: "League of Legends", category: "MOBA", path: "C:\\Riot Games\\League of Legends\\LeagueClient.exe" },
@@ -64,6 +73,7 @@ export default function App() {
     balance: 0,
     memberTier: "Guest"
   });
+  const [timePackages, setTimePackages] = useState<TimePackage[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -77,12 +87,31 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (config) {
+      loadTimePackages();
+    }
+  }, [config]);
+
   async function loadConfig() {
     try {
       const cfg = await invoke<TerminalConfig>("get_terminal_config");
       setConfig(cfg);
     } catch (e) {
       console.error("Failed to load config:", e);
+    }
+  }
+
+  async function loadTimePackages() {
+    if (!config) return;
+    try {
+      const response = await fetch(`${config.server_url}/api/time-packages/active`);
+      if (response.ok) {
+        const packages = await response.json();
+        setTimePackages(packages);
+      }
+    } catch (e) {
+      console.error("Failed to load time packages:", e);
     }
   }
 
@@ -444,7 +473,42 @@ export default function App() {
               </div>
             )}
 
-            {(activeTab === "rewards" || activeTab === "tournaments" || activeTab === "friends" || activeTab === "profile" || activeTab === "settings" || activeTab === "help") && (
+            {activeTab === "rewards" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold text-white mb-4">Select Time Package</h2>
+                  <p className="text-gray-400 mb-6">Choose how long you want to play. Prices are set by the admin.</p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {timePackages.map((pkg) => (
+                    <div 
+                      key={pkg.id} 
+                      className="bg-[hsl(240,6%,10%)] border border-white/5 rounded-lg p-4 hover:bg-white/5 hover:border-orange-500/50 cursor-pointer transition-all group"
+                    >
+                      <div className="flex flex-col items-center text-center gap-3">
+                        <div className="h-12 w-12 bg-orange-500/20 rounded-full flex items-center justify-center">
+                          <Clock className="h-6 w-6 text-orange-500" />
+                        </div>
+                        <div>
+                          <p className="text-white font-bold group-hover:text-orange-500 transition-colors">{pkg.name}</p>
+                          <p className="text-sm text-gray-500">{pkg.durationHours} hour{pkg.durationHours !== 1 ? "s" : ""}</p>
+                        </div>
+                        <p className="text-xl font-mono font-bold text-orange-500">${pkg.price}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {timePackages.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No time packages available.</p>
+                    <p className="text-sm">Contact the front desk for assistance.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(activeTab === "tournaments" || activeTab === "friends" || activeTab === "profile" || activeTab === "settings" || activeTab === "help") && (
               <div className="flex items-center justify-center h-64 text-gray-500">
                 <p>Content coming soon...</p>
               </div>

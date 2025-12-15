@@ -2,14 +2,15 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { eq, desc, sql } from "drizzle-orm";
 import {
-  users, members, terminals, games, storeItems, sessions, activityLogs,
+  users, members, terminals, games, storeItems, sessions, activityLogs, timePackages,
   type User, type InsertUser,
   type Member, type InsertMember,
   type Terminal, type InsertTerminal,
   type Game, type InsertGame,
   type StoreItem, type InsertStoreItem,
   type Session, type InsertSession,
-  type ActivityLog, type InsertActivityLog
+  type ActivityLog, type InsertActivityLog,
+  type TimePackage, type InsertTimePackage
 } from "@shared/schema";
 
 const pool = new Pool({
@@ -55,6 +56,13 @@ export interface IStorage {
   
   getActivityLogs(limit?: number): Promise<ActivityLog[]>;
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
+  
+  getTimePackages(): Promise<TimePackage[]>;
+  getActiveTimePackages(): Promise<TimePackage[]>;
+  getTimePackage(id: string): Promise<TimePackage | undefined>;
+  createTimePackage(pkg: InsertTimePackage): Promise<TimePackage>;
+  updateTimePackage(id: string, pkg: Partial<InsertTimePackage>): Promise<TimePackage | undefined>;
+  deleteTimePackage(id: string): Promise<boolean>;
   
   getDashboardStats(): Promise<{
     activeSessions: number;
@@ -226,6 +234,34 @@ export class DatabaseStorage implements IStorage {
   async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
     const [newLog] = await db.insert(activityLogs).values(log).returning();
     return newLog;
+  }
+
+  async getTimePackages(): Promise<TimePackage[]> {
+    return db.select().from(timePackages).orderBy(timePackages.sortOrder);
+  }
+
+  async getActiveTimePackages(): Promise<TimePackage[]> {
+    return db.select().from(timePackages).where(eq(timePackages.isActive, true)).orderBy(timePackages.sortOrder);
+  }
+
+  async getTimePackage(id: string): Promise<TimePackage | undefined> {
+    const [pkg] = await db.select().from(timePackages).where(eq(timePackages.id, id));
+    return pkg;
+  }
+
+  async createTimePackage(pkg: InsertTimePackage): Promise<TimePackage> {
+    const [newPkg] = await db.insert(timePackages).values(pkg).returning();
+    return newPkg;
+  }
+
+  async updateTimePackage(id: string, pkg: Partial<InsertTimePackage>): Promise<TimePackage | undefined> {
+    const [updated] = await db.update(timePackages).set(pkg).where(eq(timePackages.id, id)).returning();
+    return updated;
+  }
+
+  async deleteTimePackage(id: string): Promise<boolean> {
+    await db.delete(timePackages).where(eq(timePackages.id, id));
+    return true;
   }
 
   async getDashboardStats(): Promise<{

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
-import { insertMemberSchema, insertTerminalSchema, insertGameSchema, insertStoreItemSchema, insertSessionSchema, insertActivityLogSchema } from "@shared/schema";
+import { insertMemberSchema, insertTerminalSchema, insertGameSchema, insertStoreItemSchema, insertSessionSchema, insertActivityLogSchema, insertTimePackageSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(
@@ -229,6 +229,41 @@ export async function registerRoutes(
     res.json(stats);
   });
 
+  // Time Packages
+  app.get("/api/time-packages", async (_req, res) => {
+    const packages = await storage.getTimePackages();
+    res.json(packages);
+  });
+
+  app.get("/api/time-packages/active", async (_req, res) => {
+    const packages = await storage.getActiveTimePackages();
+    res.json(packages);
+  });
+
+  app.get("/api/time-packages/:id", async (req, res) => {
+    const pkg = await storage.getTimePackage(req.params.id);
+    if (!pkg) return res.status(404).json({ message: "Time package not found" });
+    res.json(pkg);
+  });
+
+  app.post("/api/time-packages", async (req, res) => {
+    const parsed = insertTimePackageSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const pkg = await storage.createTimePackage(parsed.data);
+    res.status(201).json(pkg);
+  });
+
+  app.patch("/api/time-packages/:id", async (req, res) => {
+    const pkg = await storage.updateTimePackage(req.params.id, req.body);
+    if (!pkg) return res.status(404).json({ message: "Time package not found" });
+    res.json(pkg);
+  });
+
+  app.delete("/api/time-packages/:id", async (req, res) => {
+    await storage.deleteTimePackage(req.params.id);
+    res.status(204).send();
+  });
+
   // Seed initial data
   app.post("/api/seed", async (_req, res) => {
     const existingTerminals = await storage.getTerminals();
@@ -282,6 +317,20 @@ export async function registerRoutes(
     ];
     for (const member of membersData) {
       await storage.createMember(member);
+    }
+
+    // Create default time packages
+    const timePackagesData = [
+      { name: "1 Hour", durationHours: 1, price: "5.00", isActive: true, sortOrder: 1 },
+      { name: "2 Hours", durationHours: 2, price: "9.00", isActive: true, sortOrder: 2 },
+      { name: "3 Hours", durationHours: 3, price: "12.00", isActive: true, sortOrder: 3 },
+      { name: "5 Hours", durationHours: 5, price: "18.00", isActive: true, sortOrder: 4 },
+      { name: "6 Hours", durationHours: 6, price: "20.00", isActive: true, sortOrder: 5 },
+      { name: "7 Hours", durationHours: 7, price: "22.00", isActive: true, sortOrder: 6 },
+      { name: "All Day (10 Hours)", durationHours: 10, price: "30.00", isActive: true, sortOrder: 7 },
+    ];
+    for (const pkg of timePackagesData) {
+      await storage.createTimePackage(pkg);
     }
 
     await storage.createActivityLog({ type: "system", message: "System initialized with seed data" });
