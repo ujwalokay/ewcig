@@ -62,6 +62,8 @@ export const sessions = pgTable("sessions", {
   endTime: timestamp("end_time"),
   status: sessionStatusEnum("status").notNull().default("active"),
   totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
+  durationMinutes: integer("duration_minutes"),
+  timePackageId: varchar("time_package_id").references(() => timePackages.id),
 });
 
 export const activityLogs = pgTable("activity_logs", {
@@ -76,6 +78,7 @@ export const timePackages = pgTable("time_packages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   durationHours: integer("duration_hours").notNull(),
+  durationMinutes: integer("duration_minutes").notNull().default(0),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   isActive: boolean("is_active").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
