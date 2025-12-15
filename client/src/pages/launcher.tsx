@@ -12,7 +12,8 @@ import {
   Utensils, AlertTriangle, User, Lock, Home,
   Trophy, Settings, HelpCircle, Gift, Users, AppWindow,
   Chrome, Music, Video, FileText, Calculator, Camera, MessageSquare, Mail,
-  X, Minus, Plus, Trash2, QrCode, Keyboard, ChevronRight
+  X, Minus, Plus, Trash2, QrCode, Keyboard, ChevronRight,
+  Crosshair, Sword, Target, Flame, Pickaxe, Car, Swords, Globe, type LucideIcon
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -45,20 +46,20 @@ const adSlides = [
 // Default fallback image for games
 const defaultGameImage = generatedImage;
 
-// Mock Data with real game images
+// Mock Data with real game images and icons
 const games = [
-  { id: 1, name: "Valorant", category: "FPS", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4fd6a11df4eb2c7c8e368e88b78e97ebb00f4688-1920x1080.jpg" },
-  { id: 2, name: "League of Legends", category: "MOBA", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4c44f7838e9c3a6ae8f02fc2f1e5a0ce66e2cf20-1920x1080.jpg" },
-  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg" },
-  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://cdn.akamai.steamstatic.com/steam/apps/1172470/header.jpg" },
-  { id: 5, name: "Dota 2", category: "MOBA", image: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg" },
-  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://cdn2.unrealengine.com/en-eg-desktop-background-1923x1080-1923x1080-828a5d1ebb0f.jpg" },
-  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://cdn.akamai.steamstatic.com/steam/apps/1672970/header.jpg" },
-  { id: 8, name: "Rocket League", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/252950/header.jpg" },
-  { id: 9, name: "GTA V", category: "Action", image: "https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg" },
-  { id: 10, name: "PUBG", category: "Battle Royale", image: "https://cdn.akamai.steamstatic.com/steam/apps/578080/header.jpg" },
-  { id: 11, name: "Overwatch 2", category: "FPS", image: "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt7f4c77fd14dff1c7/646e51bc2d39af49a3c2e0a4/ow2-homepage-hero-bg.webp" },
-  { id: 12, name: "FIFA 24", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/2195250/header.jpg" },
+  { id: 1, name: "Valorant", category: "FPS", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4fd6a11df4eb2c7c8e368e88b78e97ebb00f4688-1920x1080.jpg", icon: Crosshair },
+  { id: 2, name: "League of Legends", category: "MOBA", image: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4c44f7838e9c3a6ae8f02fc2f1e5a0ce66e2cf20-1920x1080.jpg", icon: Swords },
+  { id: 3, name: "Counter-Strike 2", category: "FPS", image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg", icon: Target },
+  { id: 4, name: "Apex Legends", category: "Battle Royale", image: "https://cdn.akamai.steamstatic.com/steam/apps/1172470/header.jpg", icon: Flame },
+  { id: 5, name: "Dota 2", category: "MOBA", image: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg", icon: Sword },
+  { id: 6, name: "Fortnite", category: "Battle Royale", image: "https://cdn2.unrealengine.com/en-eg-desktop-background-1923x1080-1923x1080-828a5d1ebb0f.jpg", icon: Target },
+  { id: 7, name: "Minecraft", category: "Sandbox", image: "https://cdn.akamai.steamstatic.com/steam/apps/1672970/header.jpg", icon: Pickaxe },
+  { id: 8, name: "Rocket League", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/252950/header.jpg", icon: Car },
+  { id: 9, name: "GTA V", category: "Action", image: "https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg", icon: Car },
+  { id: 10, name: "PUBG", category: "Battle Royale", image: "https://cdn.akamai.steamstatic.com/steam/apps/578080/header.jpg", icon: Target },
+  { id: 11, name: "Overwatch 2", category: "FPS", image: "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt7f4c77fd14dff1c7/646e51bc2d39af49a3c2e0a4/ow2-homepage-hero-bg.webp", icon: Crosshair },
+  { id: 12, name: "FIFA 24", category: "Sports", image: "https://cdn.akamai.steamstatic.com/steam/apps/2195250/header.jpg", icon: Globe },
 ];
 
 // Game card component with image fallback
@@ -102,6 +103,9 @@ function GameCard({
         onError={handleImageError}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
+      <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
+        <game.icon className={cn(iconSize, "text-white drop-shadow-lg")} />
+      </div>
       <div className={cn("absolute bottom-0 left-0 w-full", padding)}>
         <p className="text-xs text-primary font-bold mb-1 uppercase tracking-wider">{game.category}</p>
         <h4 className={cn("text-white font-bold leading-tight group-hover:text-primary transition-colors", textSize)}>{game.name}</h4>
