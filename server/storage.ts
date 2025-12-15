@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { eq, desc, sql } from "drizzle-orm";
 import {
-  users, members, terminals, games, storeItems, sessions, activityLogs, timePackages,
+  users, members, terminals, games, storeItems, sessions, activityLogs, timePackages, happyHours, systemSettings, notifications,
   type User, type InsertUser,
   type Member, type InsertMember,
   type Terminal, type InsertTerminal,
@@ -10,7 +10,10 @@ import {
   type StoreItem, type InsertStoreItem,
   type Session, type InsertSession,
   type ActivityLog, type InsertActivityLog,
-  type TimePackage, type InsertTimePackage
+  type TimePackage, type InsertTimePackage,
+  type HappyHour, type InsertHappyHour,
+  type SystemSetting, type InsertSystemSetting,
+  type Notification, type InsertNotification
 } from "@shared/schema";
 
 const pool = new Pool({
@@ -70,6 +73,32 @@ export interface IStorage {
     todayRevenue: string;
     topGames: { name: string; count: number; percent: number }[];
   }>;
+
+  getHappyHours(): Promise<HappyHour[]>;
+  getActiveHappyHours(): Promise<HappyHour[]>;
+  getHappyHour(id: string): Promise<HappyHour | undefined>;
+  createHappyHour(hh: InsertHappyHour): Promise<HappyHour>;
+  updateHappyHour(id: string, hh: Partial<InsertHappyHour>): Promise<HappyHour | undefined>;
+  deleteHappyHour(id: string): Promise<boolean>;
+  getCurrentHappyHour(): Promise<HappyHour | undefined>;
+
+  getSystemSettings(): Promise<SystemSetting[]>;
+  getSystemSetting(key: string): Promise<SystemSetting | undefined>;
+  setSystemSetting(key: string, value: string, description?: string): Promise<SystemSetting>;
+  deleteSystemSetting(key: string): Promise<boolean>;
+
+  getNotifications(userId?: string): Promise<Notification[]>;
+  getUnreadNotifications(userId?: string): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationRead(id: string): Promise<Notification | undefined>;
+  markAllNotificationsRead(userId?: string): Promise<void>;
+  deleteNotification(id: string): Promise<boolean>;
+
+  searchMembers(query: string): Promise<Member[]>;
+  deductMemberBalance(id: string, amount: string): Promise<Member | undefined>;
+
+  getRevenueReport(startDate: Date, endDate: Date): Promise<{ date: string; revenue: string }[]>;
+  getUsageReport(startDate: Date, endDate: Date): Promise<{ terminalId: string; terminalName: string; totalHours: number; sessions: number }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -285,12 +314,164 @@ export class DatabaseStorage implements IStorage {
       g.percent = total > 0 ? Math.round((g.count / total) * 100) : 0;
     });
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const allSessions = await db.select().from(sessions).where(sql`DATE(${sessions.startTime}) = DATE(${today})`);
+    const todayRevenue = allSessions.reduce((sum, s) => sum + parseFloat(s.totalCost || "0"), 0).toFixed(2);
+
     return {
       activeSessions: activeSessions.length,
       totalTerminals: allTerminals.length,
-      todayRevenue: "0.00",
+      todayRevenue,
       topGames: gameCounts
     };
+  }
+
+  async getHappyHours(): Promise<HappyHour[]> {
+    return db.select().from(happyHours);
+  }
+
+  async getActiveHappyHours(): Promise<HappyHour[]> {
+    return db.select().from(happyHours).where(eq(happyHours.isActive, true));
+  }
+
+  async getHappyHour(id: string): Promise<HappyHour | undefined> {
+    const [hh] = await db.select().from(happyHours).where(eq(happyHours.id, id));
+    return hh;
+  }
+
+  async createHappyHour(hh: InsertHappyHour): Promise<HappyHour> {
+    const [newHH] = await db.insert(happyHours).values(hh).returning();
+    return newHH;
+  }
+
+  async updateHappyHour(id: string, hh: Partial<InsertHappyHour>): Promise<HappyHour | undefined> {
+    const [updated] = await db.update(happyHours).set(hh).where(eq(happyHours.id, id)).returning();
+    return updated;
+  }
+
+  async deleteHappyHour(id: string): Promise<boolean> {
+    await db.delete(happyHours).where(eq(happyHours.id, id));
+    return true;
+  }
+
+  async getCurrentHappyHour(): Promise<HappyHour | undefined> {
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const currentDay = now.getDay().toString();
+    
+    const activeHours = await this.getActiveHappyHours();
+    return activeHours.find(hh => {
+      const days = hh.daysOfWeek.split(',');
+      if (!days.includes(currentDay)) return false;
+      return currentTime >= hh.startTime && currentTime <= hh.endTime;
+    });
+  }
+
+  async getSystemSettings(): Promise<SystemSetting[]> {
+    return db.select().from(systemSettings);
+  }
+
+  async getSystemSetting(key: string): Promise<SystemSetting | undefined> {
+    const [setting] = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
+    return setting;
+  }
+
+  async setSystemSetting(key: string, value: string, description?: string): Promise<SystemSetting> {
+    const existing = await this.getSystemSetting(key);
+    if (existing) {
+      const [updated] = await db.update(systemSettings).set({ value, description }).where(eq(systemSettings.key, key)).returning();
+      return updated;
+    }
+    const [newSetting] = await db.insert(systemSettings).values({ key, value, description }).returning();
+    return newSetting;
+  }
+
+  async deleteSystemSetting(key: string): Promise<boolean> {
+    await db.delete(systemSettings).where(eq(systemSettings.key, key));
+    return true;
+  }
+
+  async getNotifications(userId?: string): Promise<Notification[]> {
+    if (userId) {
+      return db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
+    }
+    return db.select().from(notifications).orderBy(desc(notifications.createdAt));
+  }
+
+  async getUnreadNotifications(userId?: string): Promise<Notification[]> {
+    if (userId) {
+      return db.select().from(notifications).where(sql`${notifications.userId} = ${userId} AND ${notifications.isRead} = false`).orderBy(desc(notifications.createdAt));
+    }
+    return db.select().from(notifications).where(eq(notifications.isRead, false)).orderBy(desc(notifications.createdAt));
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [newNotif] = await db.insert(notifications).values(notification).returning();
+    return newNotif;
+  }
+
+  async markNotificationRead(id: string): Promise<Notification | undefined> {
+    const [updated] = await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id)).returning();
+    return updated;
+  }
+
+  async markAllNotificationsRead(userId?: string): Promise<void> {
+    if (userId) {
+      await db.update(notifications).set({ isRead: true }).where(eq(notifications.userId, userId));
+    } else {
+      await db.update(notifications).set({ isRead: true });
+    }
+  }
+
+  async deleteNotification(id: string): Promise<boolean> {
+    await db.delete(notifications).where(eq(notifications.id, id));
+    return true;
+  }
+
+  async searchMembers(query: string): Promise<Member[]> {
+    const lowerQuery = `%${query.toLowerCase()}%`;
+    return db.select().from(members).where(
+      sql`LOWER(${members.username}) LIKE ${lowerQuery} OR LOWER(${members.realName}) LIKE ${lowerQuery}`
+    );
+  }
+
+  async deductMemberBalance(id: string, amount: string): Promise<Member | undefined> {
+    const [updated] = await db.update(members).set({ 
+      balance: sql`${members.balance} - ${amount}::decimal` 
+    }).where(eq(members.id, id)).returning();
+    return updated;
+  }
+
+  async getRevenueReport(startDate: Date, endDate: Date): Promise<{ date: string; revenue: string }[]> {
+    const result = await db.select({
+      date: sql<string>`DATE(${sessions.endTime})::text`,
+      revenue: sql<string>`COALESCE(SUM(${sessions.totalCost}), 0)::text`
+    }).from(sessions).where(
+      sql`${sessions.endTime} >= ${startDate} AND ${sessions.endTime} <= ${endDate} AND ${sessions.status} = 'ended'`
+    ).groupBy(sql`DATE(${sessions.endTime})`).orderBy(sql`DATE(${sessions.endTime})`);
+    return result;
+  }
+
+  async getUsageReport(startDate: Date, endDate: Date): Promise<{ terminalId: string; terminalName: string; totalHours: number; sessions: number }[]> {
+    const allTerminals = await this.getTerminals();
+    const terminalSessions = await db.select({
+      terminalId: sessions.terminalId,
+      totalMinutes: sql<number>`COALESCE(SUM(${sessions.durationMinutes}), 0)`,
+      sessionCount: sql<number>`COUNT(*)`
+    }).from(sessions).where(
+      sql`${sessions.startTime} >= ${startDate} AND ${sessions.startTime} <= ${endDate}`
+    ).groupBy(sessions.terminalId);
+
+    return allTerminals.map(t => {
+      const stats = terminalSessions.find(s => s.terminalId === t.id);
+      return {
+        terminalId: t.id,
+        terminalName: t.name,
+        totalHours: stats ? Math.round(stats.totalMinutes / 60 * 10) / 10 : 0,
+        sessions: stats ? stats.sessionCount : 0
+      };
+    });
   }
 }
 
