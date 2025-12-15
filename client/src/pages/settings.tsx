@@ -19,20 +19,27 @@ function TimePackageForm({
   onCancel 
 }: { 
   pkg?: TimePackage; 
-  onSave: (data: { name: string; durationHours: number; price: string; isActive: boolean; sortOrder: number }) => void; 
+  onSave: (data: { name: string; durationHours: number; durationMinutes: number; price: string; isActive: boolean; sortOrder: number }) => void; 
   onCancel: () => void;
 }) {
   const [name, setName] = useState(pkg?.name || "");
-  const [durationHours, setDurationHours] = useState(pkg?.durationHours?.toString() || "1");
+  const [durationHours, setDurationHours] = useState(pkg?.durationHours?.toString() || "0");
+  const [durationMinutes, setDurationMinutes] = useState(pkg?.durationMinutes?.toString() || "30");
   const [price, setPrice] = useState(pkg?.price || "5.00");
   const [isActive, setIsActive] = useState(pkg?.isActive ?? true);
   const [sortOrder, setSortOrder] = useState(pkg?.sortOrder?.toString() || "0");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const hours = parseInt(durationHours) || 0;
+    const minutes = parseInt(durationMinutes) || 0;
+    if (hours === 0 && minutes === 0) {
+      return;
+    }
     onSave({
       name,
-      durationHours: parseInt(durationHours),
+      durationHours: hours,
+      durationMinutes: minutes,
       price,
       isActive,
       sortOrder: parseInt(sortOrder)
@@ -46,23 +53,34 @@ function TimePackageForm({
         <Input 
           value={name} 
           onChange={(e) => setName(e.target.value)} 
-          placeholder="e.g., 6 Hours"
+          placeholder="e.g., 30 Minutes or 2 Hours"
           className="bg-background/50 border-white/10"
           data-testid="input-package-name"
           required
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label>Duration (Hours)</Label>
+          <Label>Hours</Label>
           <Input 
             type="number" 
-            min="1"
+            min="0"
             value={durationHours} 
             onChange={(e) => setDurationHours(e.target.value)} 
             className="bg-background/50 border-white/10"
             data-testid="input-duration-hours"
-            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Minutes</Label>
+          <Input 
+            type="number" 
+            min="0"
+            max="59"
+            value={durationMinutes} 
+            onChange={(e) => setDurationMinutes(e.target.value)} 
+            className="bg-background/50 border-white/10"
+            data-testid="input-duration-minutes"
           />
         </div>
         <div className="space-y-2">
@@ -121,7 +139,7 @@ export default function Settings() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { name: string; durationHours: number; price: string; isActive: boolean; sortOrder: number }) => {
+    mutationFn: async (data: { name: string; durationHours: number; durationMinutes: number; price: string; isActive: boolean; sortOrder: number }) => {
       return apiRequest("POST", "/api/time-packages", data);
     },
     onSuccess: () => {
@@ -235,7 +253,11 @@ export default function Settings() {
                       <div>
                         <p className="font-medium text-white">{pkg.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {pkg.durationHours} hour{pkg.durationHours !== 1 ? "s" : ""} - ${pkg.price}
+                          {pkg.durationHours > 0 && `${pkg.durationHours} hour${pkg.durationHours !== 1 ? "s" : ""}`}
+                          {pkg.durationHours > 0 && pkg.durationMinutes > 0 && " "}
+                          {pkg.durationMinutes > 0 && `${pkg.durationMinutes} min`}
+                          {pkg.durationHours === 0 && pkg.durationMinutes === 0 && "No duration set"}
+                          {" "}- ${pkg.price}
                         </p>
                       </div>
                     </div>
