@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
-import { insertMemberSchema, insertTerminalSchema, insertGameSchema, insertStoreItemSchema, insertSessionSchema, insertActivityLogSchema, insertTimePackageSchema } from "@shared/schema";
+import { insertMemberSchema, insertTerminalSchema, insertGameSchema, insertStoreItemSchema, insertSessionSchema, insertActivityLogSchema, insertTimePackageSchema, insertHappyHourSchema, insertNotificationSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(
@@ -209,8 +209,41 @@ export async function registerRoutes(
   app.post("/api/sessions", async (req, res) => {
     const parsed = insertSessionSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
-    const session = await storage.createSession(parsed.data);
-    await storage.createActivityLog({ type: "login", userId: session.memberId, message: `Session started on terminal` });
+    
+    const member = await storage.getMember(parsed.data.memberId);
+    if (!member) return res.status(404).json({ message: "Member not found" });
+    
+    let totalCost = "0.00";
+    if (parsed.data.timePackageId) {
+      const pkg = await storage.getTimePackage(parsed.data.timePackageId);
+      if (pkg) {
+        const currentHappyHour = await storage.getCurrentHappyHour();
+        let price = parseFloat(pkg.price);
+        if (currentHappyHour) {
+          price = price * (1 - currentHappyHour.discountPercent / 100);
+        }
+        totalCost = price.toFixed(2);
+        
+        if (parseFloat(member.balance) < price) {
+          return res.status(400).json({ message: "Insufficient balance" });
+        }
+        
+        await storage.deductMemberBalance(member.id, totalCost);
+      }
+    }
+    
+    const session = await storage.createSession({ ...parsed.data, totalCost });
+    await storage.createActivityLog({ type: "login", userId: session.memberId, message: `Session started on terminal, charged $${totalCost}` });
+    
+    if (parseFloat(member.balance) - parseFloat(totalCost) < 10) {
+      await storage.createNotification({
+        type: "low_balance",
+        title: "Low Balance Alert",
+        message: `Member ${member.username} has low balance ($${(parseFloat(member.balance) - parseFloat(totalCost)).toFixed(2)})`,
+        userId: member.id
+      });
+    }
+    
     res.status(201).json(session);
   });
 
@@ -268,6 +301,155 @@ export async function registerRoutes(
   app.delete("/api/time-packages/:id", async (req, res) => {
     await storage.deleteTimePackage(req.params.id);
     res.status(204).send();
+  });
+
+  // Happy Hours
+  app.get("/api/happy-hours", async (_req, res) => {
+    const hours = await storage.getHappyHours();
+    res.json(hours);
+  });
+
+  app.get("/api/happy-hours/active", async (_req, res) => {
+    const hours = await storage.getActiveHappyHours();
+    res.json(hours);
+  });
+
+  app.get("/api/happy-hours/current", async (_req, res) => {
+    const current = await storage.getCurrentHappyHour();
+    res.json(current || null);
+  });
+
+  app.get("/api/happy-hours/:id", async (req, res) => {
+    const hh = await storage.getHappyHour(req.params.id);
+    if (!hh) return res.status(404).json({ message: "Happy hour not found" });
+    res.json(hh);
+  });
+
+  app.post("/api/happy-hours", async (req, res) => {
+    const parsed = insertHappyHourSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const hh = await storage.createHappyHour(parsed.data);
+    await storage.createActivityLog({ type: "system", message: `Happy hour "${hh.name}" created` });
+    res.status(201).json(hh);
+  });
+
+  app.patch("/api/happy-hours/:id", async (req, res) => {
+    const hh = await storage.updateHappyHour(req.params.id, req.body);
+    if (!hh) return res.status(404).json({ message: "Happy hour not found" });
+    res.json(hh);
+  });
+
+  app.delete("/api/happy-hours/:id", async (req, res) => {
+    await storage.deleteHappyHour(req.params.id);
+    res.status(204).send();
+  });
+
+  // System Settings
+  app.get("/api/settings", async (_req, res) => {
+    const settings = await storage.getSystemSettings();
+    res.json(settings);
+  });
+
+  app.get("/api/settings/:key", async (req, res) => {
+    const setting = await storage.getSystemSetting(req.params.key);
+    if (!setting) return res.status(404).json({ message: "Setting not found" });
+    res.json(setting);
+  });
+
+  app.put("/api/settings/:key", async (req, res) => {
+    const { value, description } = req.body;
+    if (!value) return res.status(400).json({ message: "Value required" });
+    const setting = await storage.setSystemSetting(req.params.key, value, description);
+    res.json(setting);
+  });
+
+  app.delete("/api/settings/:key", async (req, res) => {
+    await storage.deleteSystemSetting(req.params.key);
+    res.status(204).send();
+  });
+
+  // Notifications
+  app.get("/api/notifications", async (req, res) => {
+    const userId = req.query.userId as string | undefined;
+    const notifications = await storage.getNotifications(userId);
+    res.json(notifications);
+  });
+
+  app.get("/api/notifications/unread", async (req, res) => {
+    const userId = req.query.userId as string | undefined;
+    const notifications = await storage.getUnreadNotifications(userId);
+    res.json(notifications);
+  });
+
+  app.post("/api/notifications", async (req, res) => {
+    const parsed = insertNotificationSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const notification = await storage.createNotification(parsed.data);
+    res.status(201).json(notification);
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    const notification = await storage.markNotificationRead(req.params.id);
+    if (!notification) return res.status(404).json({ message: "Notification not found" });
+    res.json(notification);
+  });
+
+  app.post("/api/notifications/mark-all-read", async (req, res) => {
+    const userId = req.query.userId as string | undefined;
+    await storage.markAllNotificationsRead(userId);
+    res.json({ message: "All notifications marked as read" });
+  });
+
+  app.delete("/api/notifications/:id", async (req, res) => {
+    await storage.deleteNotification(req.params.id);
+    res.status(204).send();
+  });
+
+  // Member Search
+  app.get("/api/members/search", async (req, res) => {
+    const query = req.query.q as string;
+    if (!query) return res.json([]);
+    const members = await storage.searchMembers(query);
+    res.json(members);
+  });
+
+  // Reports
+  app.get("/api/reports/revenue", async (req, res) => {
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : new Date();
+    const report = await storage.getRevenueReport(startDate, endDate);
+    res.json(report);
+  });
+
+  app.get("/api/reports/usage", async (req, res) => {
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : new Date();
+    const report = await storage.getUsageReport(startDate, endDate);
+    res.json(report);
+  });
+
+  // Get price with happy hour discount
+  app.get("/api/pricing/calculate", async (req, res) => {
+    const basePrice = parseFloat(req.query.price as string) || 0;
+    const currentHappyHour = await storage.getCurrentHappyHour();
+    
+    if (currentHappyHour) {
+      const discount = currentHappyHour.discountPercent / 100;
+      const discountedPrice = basePrice * (1 - discount);
+      res.json({
+        originalPrice: basePrice.toFixed(2),
+        discountedPrice: discountedPrice.toFixed(2),
+        happyHour: currentHappyHour,
+        isHappyHour: true
+      });
+    } else {
+      res.json({
+        originalPrice: basePrice.toFixed(2),
+        discountedPrice: basePrice.toFixed(2),
+        happyHour: null,
+        isHappyHour: false
+      });
+    }
   });
 
   // Seed initial data
