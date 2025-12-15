@@ -274,6 +274,7 @@ export default function Launcher() {
     setSessionTimeRemainingSeconds(totalMinutes * 60);
     setSessionStartTime(new Date());
     setShowSessionSelection(false);
+    setIsLocked(false);
     setUsername("");
     setPassword("");
   };
