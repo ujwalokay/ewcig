@@ -202,6 +202,12 @@ export default function Launcher() {
   const [sessionDurationMinutes, setSessionDurationMinutes] = useState(120);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [isUnlimited, setIsUnlimited] = useState(false);
+  const [customHours, setCustomHours] = useState("0");
+  const [customMinutes, setCustomMinutes] = useState("30");
+  const [sessionCost, setSessionCost] = useState(0);
+  const [showLogoutSummary, setShowLogoutSummary] = useState(false);
+  const [finalSessionData, setFinalSessionData] = useState<{startTime: Date; endTime: Date; totalMinutes: number; totalCost: number} | null>(null);
+  const hourlyRate = 5.00;
 
   const { data: timePackages = [] } = useQuery<TimePackage[]>({
     queryKey: ["/api/time-packages/active"]
@@ -261,6 +267,7 @@ export default function Launcher() {
   const handleSessionSelect = (pkg: TimePackage) => {
     const totalMinutes = (pkg.durationHours * 60) + (pkg.durationMinutes || 0);
     const isUnlimitedSession = totalMinutes >= 600;
+    const cost = parseFloat(pkg.price);
     
     toast({
       title: "Session Started",
@@ -273,11 +280,126 @@ export default function Launcher() {
     setSessionDurationMinutes(totalMinutes);
     setSessionTimeRemainingSeconds(totalMinutes * 60);
     setSessionStartTime(new Date());
+    setSessionCost(cost);
     setShowSessionSelection(false);
     setIsLocked(false);
     setUsername("");
     setPassword("");
   };
+
+  const handleCustomTimeStart = () => {
+    const hours = parseInt(customHours) || 0;
+    const minutes = parseInt(customMinutes) || 0;
+    const totalMinutes = (hours * 60) + minutes;
+    
+    if (totalMinutes < 1) {
+      toast({
+        title: "Invalid Time",
+        description: "Please enter at least 1 minute.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const cost = (totalMinutes / 60) * hourlyRate;
+    
+    toast({
+      title: "Session Started",
+      description: `${hours > 0 ? hours + " hr " : ""}${minutes > 0 ? minutes + " min" : ""} session started. Amount: $${cost.toFixed(2)}`,
+    });
+    
+    setIsUnlimited(false);
+    setSessionDurationMinutes(totalMinutes);
+    setSessionTimeRemainingSeconds(totalMinutes * 60);
+    setSessionStartTime(new Date());
+    setSessionCost(cost);
+    setShowSessionSelection(false);
+    setIsLocked(false);
+    setUsername("");
+    setPassword("");
+  };
+
+  const handleLogout = () => {
+    if (sessionStartTime) {
+      const endTime = new Date();
+      const elapsedMs = endTime.getTime() - sessionStartTime.getTime();
+      const usedMinutes = Math.ceil(elapsedMs / 60000);
+      const totalCost = (usedMinutes / 60) * hourlyRate;
+      
+      setFinalSessionData({
+        startTime: sessionStartTime,
+        endTime,
+        totalMinutes: usedMinutes,
+        totalCost
+      });
+      setShowLogoutSummary(true);
+    } else {
+      setIsLocked(true);
+    }
+  };
+
+  const handleConfirmLogout = () => {
+    setShowLogoutSummary(false);
+    setFinalSessionData(null);
+    setSessionStartTime(null);
+    setIsLocked(true);
+  };
+
+  // Logout Summary Screen
+  if (showLogoutSummary && finalSessionData) {
+    const formatTime = (date: Date) => date.toLocaleTimeString();
+    const hours = Math.floor(finalSessionData.totalMinutes / 60);
+    const mins = finalSessionData.totalMinutes % 60;
+    
+    return (
+      <div className="h-screen w-screen bg-black relative overflow-hidden flex flex-col font-display">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{ backgroundImage: `url(${generatedImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/90 to-black z-10" />
+        
+        <div className="relative z-20 flex-1 flex flex-col items-center justify-center px-8">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 max-w-md w-full text-center">
+            <div className="h-16 w-16 bg-primary/20 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <DollarSign className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Session Complete</h1>
+            <p className="text-white/60 mb-6">Thank you for gaming with us!</p>
+            
+            <div className="space-y-4 text-left bg-black/30 rounded-lg p-4 mb-6">
+              <div className="flex justify-between">
+                <span className="text-white/60">Start Time:</span>
+                <span className="text-white font-mono">{formatTime(finalSessionData.startTime)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/60">End Time:</span>
+                <span className="text-white font-mono">{formatTime(finalSessionData.endTime)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/60">Time Used:</span>
+                <span className="text-white font-mono">
+                  {hours > 0 ? `${hours} hr ` : ""}{mins} min
+                </span>
+              </div>
+              <div className="border-t border-white/10 pt-4 flex justify-between">
+                <span className="text-white font-bold">Amount to Pay:</span>
+                <span className="text-2xl font-mono font-bold text-primary">${finalSessionData.totalCost.toFixed(2)}</span>
+              </div>
+            </div>
+            
+            <Button 
+              className="w-full bg-primary text-white font-bold"
+              onClick={handleConfirmLogout}
+              data-testid="button-confirm-logout"
+            >
+              OK - Lock Terminal
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Session Selection Screen
   if (showSessionSelection) {
@@ -378,6 +500,54 @@ export default function Launcher() {
                 </button>
               );
             })}
+          </div>
+
+          {/* Custom Time Section */}
+          <div className="mt-8 w-full max-w-md">
+            <div className="text-center mb-4">
+              <p className="text-white/60 text-sm">Or add custom time</p>
+            </div>
+            <div className="bg-white/5 backdrop-blur border border-white/10 rounded-xl p-4">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex-1">
+                  <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Hours</label>
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    value={customHours}
+                    onChange={(e) => setCustomHours(e.target.value)}
+                    className="bg-black/30 border-white/10 text-center text-white font-mono text-lg"
+                    data-testid="input-custom-hours"
+                  />
+                </div>
+                <span className="text-white/40 text-2xl pt-5">:</span>
+                <div className="flex-1">
+                  <label className="text-xs text-white/50 uppercase tracking-wider block mb-1">Minutes</label>
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    max="59"
+                    value={customMinutes}
+                    onChange={(e) => setCustomMinutes(e.target.value)}
+                    className="bg-black/30 border-white/10 text-center text-white font-mono text-lg"
+                    data-testid="input-custom-minutes"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mb-4 px-2">
+                <span className="text-white/60">Rate: ${hourlyRate.toFixed(2)}/hr</span>
+                <span className="text-lg font-mono font-bold text-primary">
+                  ${(((parseInt(customHours) || 0) * 60 + (parseInt(customMinutes) || 0)) / 60 * hourlyRate).toFixed(2)}
+                </span>
+              </div>
+              <Button 
+                className="w-full bg-primary text-white font-bold"
+                onClick={handleCustomTimeStart}
+                data-testid="button-start-custom-session"
+              >
+                <Play className="h-4 w-4 mr-2" /> Start Session
+              </Button>
+            </div>
           </div>
 
           {/* Balance Warning */}
@@ -696,10 +866,10 @@ export default function Launcher() {
           <Button 
             variant="destructive" 
             className="w-full font-bold"
-            onClick={handleLock}
+            onClick={handleLogout}
             data-testid="button-lock-terminal"
           >
-            <Lock className="h-4 w-4 mr-2" /> Lock Terminal
+            <LogOut className="h-4 w-4 mr-2" /> End Session
           </Button>
           <div className="flex items-center justify-center gap-4 py-2">
             <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-white">
