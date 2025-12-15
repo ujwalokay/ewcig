@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useTauriGames, type GameInfo } from "@/hooks/use-tauri-games";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import type { TimePackage } from "@shared/schema";
 import generatedImage from '@assets/generated_images/futuristic_gaming_cafe_interior_concept_art.png';
 
 const adSlides = [
@@ -131,14 +133,14 @@ const foodMenu = [
 
 type ActiveTab = "home" | "games" | "apps" | "food" | "rewards" | "tournaments" | "friends" | "profile" | "settings" | "help";
 
-// Session time options with pricing
-const sessionOptions = [
-  { id: 1, hours: 1, price: 5.00, label: "1 Hour" },
-  { id: 2, hours: 2, price: 9.00, label: "2 Hours" },
-  { id: 3, hours: 3, price: 12.00, label: "3 Hours" },
-  { id: 4, hours: 5, price: 18.00, label: "5 Hours" },
-  { id: 5, hours: 0, price: 25.00, label: "Unlimited", isUnlimited: true },
-];
+// Format seconds to HH:MM:SS
+function formatTimeRemaining(seconds: number): string {
+  if (seconds <= 0) return "00:00:00";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
 
 export default function Launcher() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -196,8 +198,40 @@ export default function Launcher() {
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
   const [userBalance] = useState(24.50);
-  const [sessionTimeLeft, setSessionTimeLeft] = useState("02:00:00");
+  const [sessionTimeRemainingSeconds, setSessionTimeRemainingSeconds] = useState(7200);
+  const [sessionDurationMinutes, setSessionDurationMinutes] = useState(120);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [isUnlimited, setIsUnlimited] = useState(false);
+
+  const { data: timePackages = [] } = useQuery<TimePackage[]>({
+    queryKey: ["/api/time-packages/active"]
+  });
+
+  useEffect(() => {
+    if (!sessionStartTime || isUnlimited || isLocked) return;
+    
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
+      const totalDurationSeconds = sessionDurationMinutes * 60;
+      const remaining = Math.max(0, totalDurationSeconds - elapsed);
+      setSessionTimeRemainingSeconds(remaining);
+      
+      if (remaining <= 0) {
+        toast({
+          title: "Session Expired",
+          description: "Your gaming session has ended. Please select a new session.",
+          variant: "destructive",
+        });
+        setIsLocked(true);
+        setShowSessionSelection(false);
+        setSessionStartTime(null);
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [sessionStartTime, sessionDurationMinutes, isUnlimited, isLocked]);
+
+  const sessionTimeLeft = formatTimeRemaining(sessionTimeRemainingSeconds);
 
   useEffect(() => {
     const adTimer = setInterval(() => {
@@ -224,18 +258,21 @@ export default function Launcher() {
     }
   };
 
-  const handleSessionSelect = (option: typeof sessionOptions[0]) => {
+  const handleSessionSelect = (pkg: TimePackage) => {
+    const totalMinutes = (pkg.durationHours * 60) + (pkg.durationMinutes || 0);
+    const isUnlimitedSession = totalMinutes >= 600;
+    
     toast({
       title: "Session Started",
-      description: option.isUnlimited 
+      description: isUnlimitedSession 
         ? "Unlimited gaming time activated!" 
-        : `${option.hours} hour(s) session started. Enjoy!`,
+        : `${pkg.name} session started. Enjoy!`,
     });
-    setIsUnlimited(option.isUnlimited || false);
-    if (!option.isUnlimited && option.hours > 0) {
-      const h = String(option.hours).padStart(2, '0');
-      setSessionTimeLeft(`${h}:00:00`);
-    }
+    
+    setIsUnlimited(isUnlimitedSession);
+    setSessionDurationMinutes(totalMinutes);
+    setSessionTimeRemainingSeconds(totalMinutes * 60);
+    setSessionStartTime(new Date());
     setShowSessionSelection(false);
     setUsername("");
     setPassword("");
@@ -300,40 +337,46 @@ export default function Launcher() {
             <p className="text-white/60">Choose how long you want to play</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full max-w-4xl">
-            {sessionOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => handleSessionSelect(option)}
-                data-testid={`button-session-${option.id}`}
-                className={cn(
-                  "relative bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 text-center transition-all hover:border-primary/50 hover:bg-white/10 group",
-                  option.isUnlimited && "md:col-span-1 border-primary/30 bg-primary/5"
-                )}
-              >
-                {option.isUnlimited && (
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-white text-xs">Best Value</Badge>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl">
+            {timePackages.map((pkg) => {
+              const totalMinutes = (pkg.durationHours * 60) + (pkg.durationMinutes || 0);
+              const isUnlimitedPkg = totalMinutes >= 600;
+              const pricePerHour = totalMinutes > 0 ? (parseFloat(pkg.price) / (totalMinutes / 60)) : 0;
+              
+              return (
+                <button
+                  key={pkg.id}
+                  onClick={() => handleSessionSelect(pkg)}
+                  data-testid={`button-session-${pkg.id}`}
+                  className={cn(
+                    "relative bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 text-center transition-all hover:border-primary/50 hover:bg-white/10 group",
+                    isUnlimitedPkg && "border-primary/30 bg-primary/5"
+                  )}
+                >
+                  {isUnlimitedPkg && (
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-primary text-white text-xs">Best Value</Badge>
+                    </div>
+                  )}
+                  <div className={cn(
+                    "h-12 w-12 rounded-full mx-auto mb-3 flex items-center justify-center",
+                    isUnlimitedPkg ? "bg-primary/20" : "bg-white/10"
+                  )}>
+                    <Clock className={cn(
+                      "h-6 w-6",
+                      isUnlimitedPkg ? "text-primary" : "text-white/60"
+                    )} />
                   </div>
-                )}
-                <div className={cn(
-                  "h-12 w-12 rounded-full mx-auto mb-3 flex items-center justify-center",
-                  option.isUnlimited ? "bg-primary/20" : "bg-white/10"
-                )}>
-                  <Clock className={cn(
-                    "h-6 w-6",
-                    option.isUnlimited ? "text-primary" : "text-white/60"
-                  )} />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
-                  {option.label}
-                </h3>
-                <p className="text-2xl font-mono font-bold text-primary">${option.price.toFixed(2)}</p>
-                {!option.isUnlimited && (
-                  <p className="text-xs text-white/40 mt-1">${(option.price / option.hours).toFixed(2)}/hr</p>
-                )}
-              </button>
-            ))}
+                  <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
+                    {pkg.name}
+                  </h3>
+                  <p className="text-2xl font-mono font-bold text-primary">${parseFloat(pkg.price).toFixed(2)}</p>
+                  {!isUnlimitedPkg && pricePerHour > 0 && (
+                    <p className="text-xs text-white/40 mt-1">${pricePerHour.toFixed(2)}/hr</p>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Balance Warning */}

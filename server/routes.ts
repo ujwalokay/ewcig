@@ -88,7 +88,8 @@ export async function registerRoutes(
         username: "",
         timeRemaining: 0,
         balance: 0,
-        memberTier: "Guest"
+        memberTier: "Guest",
+        durationMinutes: 0
       });
     }
     
@@ -101,21 +102,26 @@ export async function registerRoutes(
         username: "",
         timeRemaining: 0,
         balance: 0,
-        memberTier: "Guest"
+        memberTier: "Guest",
+        durationMinutes: 0
       });
     }
 
     const member = await storage.getMember(activeSession.memberId);
     const startTime = new Date(activeSession.startTime).getTime();
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    const timeRemaining = Math.max(0, 7200 - elapsed);
+    const totalDurationSeconds = (activeSession.durationMinutes || 120) * 60;
+    const timeRemaining = Math.max(0, totalDurationSeconds - elapsed);
 
     res.json({
       active: true,
       username: member?.username || "Guest",
       timeRemaining,
       balance: parseFloat(member?.balance || "0"),
-      memberTier: member?.tier || "Bronze"
+      memberTier: member?.tier || "Bronze",
+      durationMinutes: activeSession.durationMinutes || 120,
+      sessionId: activeSession.id,
+      startTime: activeSession.startTime
     });
   });
 
