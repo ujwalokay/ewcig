@@ -84,6 +84,33 @@ export const timePackages = pgTable("time_packages", {
   sortOrder: integer("sort_order").notNull().default(0),
 });
 
+export const happyHours = pgTable("happy_hours", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  startTime: text("start_time").notNull(),
+  endTime: text("end_time").notNull(),
+  discountPercent: integer("discount_percent").notNull().default(20),
+  daysOfWeek: text("days_of_week").notNull().default("1,2,3,4,5"),
+  isActive: boolean("is_active").notNull().default(true),
+});
+
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+});
+
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  userId: varchar("user_id"),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -96,6 +123,9 @@ export const insertStoreItemSchema = createInsertSchema(storeItems).omit({ id: t
 export const insertSessionSchema = createInsertSchema(sessions).omit({ id: true, startTime: true });
 export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({ id: true, timestamp: true });
 export const insertTimePackageSchema = createInsertSchema(timePackages).omit({ id: true });
+export const insertHappyHourSchema = createInsertSchema(happyHours).omit({ id: true });
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({ id: true });
+export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -113,3 +143,9 @@ export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type InsertTimePackage = z.infer<typeof insertTimePackageSchema>;
 export type TimePackage = typeof timePackages.$inferSelect;
+export type InsertHappyHour = z.infer<typeof insertHappyHourSchema>;
+export type HappyHour = typeof happyHours.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
