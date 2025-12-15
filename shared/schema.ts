@@ -123,7 +123,25 @@ export const insertStoreItemSchema = createInsertSchema(storeItems).omit({ id: t
 export const insertSessionSchema = createInsertSchema(sessions).omit({ id: true, startTime: true });
 export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({ id: true, timestamp: true });
 export const insertTimePackageSchema = createInsertSchema(timePackages).omit({ id: true });
-export const insertHappyHourSchema = createInsertSchema(happyHours).omit({ id: true });
+const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/;
+const normalizeTime = (time: string) => {
+  const trimmed = time.trim();
+  const match = trimmed.match(timeRegex);
+  if (!match) throw new Error(`Invalid time format: ${time}. Use HH:MM format.`);
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+};
+export const insertHappyHourSchema = createInsertSchema(happyHours).omit({ id: true }).superRefine((data, ctx) => {
+  if (!timeRegex.test(data.startTime.trim())) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Start time must be in HH:MM format", path: ["startTime"] });
+  }
+  if (!timeRegex.test(data.endTime.trim())) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "End time must be in HH:MM format", path: ["endTime"] });
+  }
+}).transform((data) => ({
+  ...data,
+  startTime: normalizeTime(data.startTime),
+  endTime: normalizeTime(data.endTime)
+}));
 export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({ id: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
 
