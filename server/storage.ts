@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { eq, desc, sql } from "drizzle-orm";
 import {
   users, members, terminals, games, storeItems, sessions, activityLogs, timePackages, happyHours, systemSettings, notifications,
+  launcherGames, launcherFoodItems, launcherTournaments, launcherRewards, launcherApps,
   type User, type InsertUser,
   type Member, type InsertMember,
   type Terminal, type InsertTerminal,
@@ -13,7 +14,12 @@ import {
   type TimePackage, type InsertTimePackage,
   type HappyHour, type InsertHappyHour,
   type SystemSetting, type InsertSystemSetting,
-  type Notification, type InsertNotification
+  type Notification, type InsertNotification,
+  type LauncherGame, type InsertLauncherGame,
+  type LauncherFoodItem, type InsertLauncherFoodItem,
+  type LauncherTournament, type InsertLauncherTournament,
+  type LauncherReward, type InsertLauncherReward,
+  type LauncherApp, type InsertLauncherApp
 } from "@shared/schema";
 
 const pool = new Pool({
@@ -99,6 +105,37 @@ export interface IStorage {
 
   getRevenueReport(startDate: Date, endDate: Date): Promise<{ date: string; revenue: string }[]>;
   getUsageReport(startDate: Date, endDate: Date): Promise<{ terminalId: string; terminalName: string; totalHours: number; sessions: number }[]>;
+
+  // Launcher Content Methods
+  getLauncherGames(): Promise<LauncherGame[]>;
+  getLauncherGame(id: string): Promise<LauncherGame | undefined>;
+  createLauncherGame(game: InsertLauncherGame): Promise<LauncherGame>;
+  updateLauncherGame(id: string, game: Partial<InsertLauncherGame>): Promise<LauncherGame | undefined>;
+  deleteLauncherGame(id: string): Promise<boolean>;
+
+  getLauncherFoodItems(): Promise<LauncherFoodItem[]>;
+  getLauncherFoodItem(id: string): Promise<LauncherFoodItem | undefined>;
+  createLauncherFoodItem(item: InsertLauncherFoodItem): Promise<LauncherFoodItem>;
+  updateLauncherFoodItem(id: string, item: Partial<InsertLauncherFoodItem>): Promise<LauncherFoodItem | undefined>;
+  deleteLauncherFoodItem(id: string): Promise<boolean>;
+
+  getLauncherTournaments(): Promise<LauncherTournament[]>;
+  getLauncherTournament(id: string): Promise<LauncherTournament | undefined>;
+  createLauncherTournament(tournament: InsertLauncherTournament): Promise<LauncherTournament>;
+  updateLauncherTournament(id: string, tournament: Partial<InsertLauncherTournament>): Promise<LauncherTournament | undefined>;
+  deleteLauncherTournament(id: string): Promise<boolean>;
+
+  getLauncherRewards(): Promise<LauncherReward[]>;
+  getLauncherReward(id: string): Promise<LauncherReward | undefined>;
+  createLauncherReward(reward: InsertLauncherReward): Promise<LauncherReward>;
+  updateLauncherReward(id: string, reward: Partial<InsertLauncherReward>): Promise<LauncherReward | undefined>;
+  deleteLauncherReward(id: string): Promise<boolean>;
+
+  getLauncherApps(): Promise<LauncherApp[]>;
+  getLauncherApp(id: string): Promise<LauncherApp | undefined>;
+  createLauncherApp(app: InsertLauncherApp): Promise<LauncherApp>;
+  updateLauncherApp(id: string, app: Partial<InsertLauncherApp>): Promise<LauncherApp | undefined>;
+  deleteLauncherApp(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -472,6 +509,131 @@ export class DatabaseStorage implements IStorage {
         sessions: stats ? stats.sessionCount : 0
       };
     });
+  }
+
+  // Launcher Games
+  async getLauncherGames(): Promise<LauncherGame[]> {
+    return db.select().from(launcherGames).where(eq(launcherGames.isActive, true)).orderBy(launcherGames.sortOrder);
+  }
+
+  async getLauncherGame(id: string): Promise<LauncherGame | undefined> {
+    const [game] = await db.select().from(launcherGames).where(eq(launcherGames.id, id));
+    return game;
+  }
+
+  async createLauncherGame(game: InsertLauncherGame): Promise<LauncherGame> {
+    const [newGame] = await db.insert(launcherGames).values(game).returning();
+    return newGame;
+  }
+
+  async updateLauncherGame(id: string, game: Partial<InsertLauncherGame>): Promise<LauncherGame | undefined> {
+    const [updated] = await db.update(launcherGames).set(game).where(eq(launcherGames.id, id)).returning();
+    return updated;
+  }
+
+  async deleteLauncherGame(id: string): Promise<boolean> {
+    await db.delete(launcherGames).where(eq(launcherGames.id, id));
+    return true;
+  }
+
+  // Launcher Food Items
+  async getLauncherFoodItems(): Promise<LauncherFoodItem[]> {
+    return db.select().from(launcherFoodItems).where(eq(launcherFoodItems.isActive, true)).orderBy(launcherFoodItems.sortOrder);
+  }
+
+  async getLauncherFoodItem(id: string): Promise<LauncherFoodItem | undefined> {
+    const [item] = await db.select().from(launcherFoodItems).where(eq(launcherFoodItems.id, id));
+    return item;
+  }
+
+  async createLauncherFoodItem(item: InsertLauncherFoodItem): Promise<LauncherFoodItem> {
+    const [newItem] = await db.insert(launcherFoodItems).values(item).returning();
+    return newItem;
+  }
+
+  async updateLauncherFoodItem(id: string, item: Partial<InsertLauncherFoodItem>): Promise<LauncherFoodItem | undefined> {
+    const [updated] = await db.update(launcherFoodItems).set(item).where(eq(launcherFoodItems.id, id)).returning();
+    return updated;
+  }
+
+  async deleteLauncherFoodItem(id: string): Promise<boolean> {
+    await db.delete(launcherFoodItems).where(eq(launcherFoodItems.id, id));
+    return true;
+  }
+
+  // Launcher Tournaments
+  async getLauncherTournaments(): Promise<LauncherTournament[]> {
+    return db.select().from(launcherTournaments).where(eq(launcherTournaments.isActive, true)).orderBy(launcherTournaments.sortOrder);
+  }
+
+  async getLauncherTournament(id: string): Promise<LauncherTournament | undefined> {
+    const [tournament] = await db.select().from(launcherTournaments).where(eq(launcherTournaments.id, id));
+    return tournament;
+  }
+
+  async createLauncherTournament(tournament: InsertLauncherTournament): Promise<LauncherTournament> {
+    const [newTournament] = await db.insert(launcherTournaments).values(tournament).returning();
+    return newTournament;
+  }
+
+  async updateLauncherTournament(id: string, tournament: Partial<InsertLauncherTournament>): Promise<LauncherTournament | undefined> {
+    const [updated] = await db.update(launcherTournaments).set(tournament).where(eq(launcherTournaments.id, id)).returning();
+    return updated;
+  }
+
+  async deleteLauncherTournament(id: string): Promise<boolean> {
+    await db.delete(launcherTournaments).where(eq(launcherTournaments.id, id));
+    return true;
+  }
+
+  // Launcher Rewards
+  async getLauncherRewards(): Promise<LauncherReward[]> {
+    return db.select().from(launcherRewards).where(eq(launcherRewards.isActive, true)).orderBy(launcherRewards.sortOrder);
+  }
+
+  async getLauncherReward(id: string): Promise<LauncherReward | undefined> {
+    const [reward] = await db.select().from(launcherRewards).where(eq(launcherRewards.id, id));
+    return reward;
+  }
+
+  async createLauncherReward(reward: InsertLauncherReward): Promise<LauncherReward> {
+    const [newReward] = await db.insert(launcherRewards).values(reward).returning();
+    return newReward;
+  }
+
+  async updateLauncherReward(id: string, reward: Partial<InsertLauncherReward>): Promise<LauncherReward | undefined> {
+    const [updated] = await db.update(launcherRewards).set(reward).where(eq(launcherRewards.id, id)).returning();
+    return updated;
+  }
+
+  async deleteLauncherReward(id: string): Promise<boolean> {
+    await db.delete(launcherRewards).where(eq(launcherRewards.id, id));
+    return true;
+  }
+
+  // Launcher Apps
+  async getLauncherApps(): Promise<LauncherApp[]> {
+    return db.select().from(launcherApps).where(eq(launcherApps.isActive, true)).orderBy(launcherApps.sortOrder);
+  }
+
+  async getLauncherApp(id: string): Promise<LauncherApp | undefined> {
+    const [app] = await db.select().from(launcherApps).where(eq(launcherApps.id, id));
+    return app;
+  }
+
+  async createLauncherApp(app: InsertLauncherApp): Promise<LauncherApp> {
+    const [newApp] = await db.insert(launcherApps).values(app).returning();
+    return newApp;
+  }
+
+  async updateLauncherApp(id: string, app: Partial<InsertLauncherApp>): Promise<LauncherApp | undefined> {
+    const [updated] = await db.update(launcherApps).set(app).where(eq(launcherApps.id, id)).returning();
+    return updated;
+  }
+
+  async deleteLauncherApp(id: string): Promise<boolean> {
+    await db.delete(launcherApps).where(eq(launcherApps.id, id));
+    return true;
   }
 }
 
