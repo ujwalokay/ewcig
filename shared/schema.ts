@@ -145,6 +145,70 @@ export const insertHappyHourSchema = createInsertSchema(happyHours).omit({ id: t
 export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({ id: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
 
+// Launcher Content Tables
+export const launcherGames = pgTable("launcher_games", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  imageUrl: text("image_url"),
+  iconType: text("icon_type").default("Gamepad2"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const launcherFoodItems = pgTable("launcher_food_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  imageUrl: text("image_url"),
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const launcherTournaments = pgTable("launcher_tournaments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  game: text("game").notNull(),
+  prizePool: text("prize_pool"),
+  date: text("date").notNull(),
+  time: text("time").notNull(),
+  description: text("description"),
+  maxParticipants: integer("max_participants").default(32),
+  currentParticipants: integer("current_participants").default(0),
+  entryFee: decimal("entry_fee", { precision: 10, scale: 2 }).default("0"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const launcherRewards = pgTable("launcher_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  pointsCost: integer("points_cost").notNull(),
+  imageUrl: text("image_url"),
+  category: text("category").default("General"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const launcherApps = pgTable("launcher_apps", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  iconType: text("icon_type").default("AppWindow"),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const insertLauncherGameSchema = createInsertSchema(launcherGames).omit({ id: true });
+export const insertLauncherFoodItemSchema = createInsertSchema(launcherFoodItems).omit({ id: true });
+export const insertLauncherTournamentSchema = createInsertSchema(launcherTournaments).omit({ id: true });
+export const insertLauncherRewardSchema = createInsertSchema(launcherRewards).omit({ id: true });
+export const insertLauncherAppSchema = createInsertSchema(launcherApps).omit({ id: true });
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertMember = z.infer<typeof insertMemberSchema>;
@@ -167,3 +231,14 @@ export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 export type SystemSetting = typeof systemSettings.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+
+export type InsertLauncherGame = z.infer<typeof insertLauncherGameSchema>;
+export type LauncherGame = typeof launcherGames.$inferSelect;
+export type InsertLauncherFoodItem = z.infer<typeof insertLauncherFoodItemSchema>;
+export type LauncherFoodItem = typeof launcherFoodItems.$inferSelect;
+export type InsertLauncherTournament = z.infer<typeof insertLauncherTournamentSchema>;
+export type LauncherTournament = typeof launcherTournaments.$inferSelect;
+export type InsertLauncherReward = z.infer<typeof insertLauncherRewardSchema>;
+export type LauncherReward = typeof launcherRewards.$inferSelect;
+export type InsertLauncherApp = z.infer<typeof insertLauncherAppSchema>;
+export type LauncherApp = typeof launcherApps.$inferSelect;
