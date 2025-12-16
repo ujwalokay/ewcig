@@ -11,6 +11,7 @@ import Games from "@/pages/games";
 import Store from "@/pages/store";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import LauncherSettings from "@/pages/launcher-settings";
 import ClientGenerator from "@/pages/client-generator";
 import Login from "@/pages/login";
 import Launcher from "@/pages/launcher";
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/store" component={Store} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={Settings} />
+      <Route path="/launcher-settings" component={LauncherSettings} />
       <Route path="/client-generator" component={ClientGenerator} />
       <Route component={NotFound} />
     </Switch>

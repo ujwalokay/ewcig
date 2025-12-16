@@ -1,4 +1,4 @@
-import { Home, Monitor, Users, Gamepad2, ShoppingBag, Settings, LogOut, Activity, FileCode } from "lucide-react";
+import { Home, Monitor, Users, Gamepad2, ShoppingBag, Settings, LogOut, Activity, FileCode, Rocket } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -65,6 +65,21 @@ export function Sidebar() {
               )}
             <FileCode className={cn("h-5 w-5", location === "/client-generator" ? "text-primary" : "group-hover:text-white")} />
             <span>Client Generator</span>
+        </Link>
+        <Link 
+          href="/launcher-settings"
+          className={cn(
+            "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 group relative overflow-hidden",
+            location === "/launcher-settings"
+              ? "bg-sidebar-primary/10 text-primary font-medium"
+              : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-muted-foreground"
+          )}
+        >
+            {location === "/launcher-settings" && (
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(255,107,0,0.5)]" />
+            )}
+            <Rocket className={cn("h-5 w-5", location === "/launcher-settings" ? "text-primary" : "group-hover:text-white")} />
+            <span>Launcher Settings</span>
         </Link>
         <Link 
           href="/settings"

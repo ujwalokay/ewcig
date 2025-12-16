@@ -19,8 +19,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import type { TimePackage } from "@shared/schema";
+import type { TimePackage, LauncherGame, LauncherFoodItem, LauncherTournament, LauncherReward, LauncherApp } from "@shared/schema";
 import generatedImage from '@assets/generated_images/futuristic_gaming_cafe_interior_concept_art.png';
+
+// Icon mapping for games fetched from API
+const iconMap: Record<string, LucideIcon> = {
+  Crosshair, Sword, Target, Flame, Pickaxe, Car, Swords, Globe, Sparkles, Gamepad2
+};
+
+// Icon mapping for apps fetched from API
+const appIconMap: Record<string, LucideIcon> = {
+  Chrome, Music, Video, FileText, Calculator, Camera, MessageSquare, Mail, AppWindow
+};
 
 const adSlides = [
   {
