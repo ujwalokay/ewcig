@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import type { LauncherGame } from "@shared/schema";
 
 export interface GameInfo {
   id: string;
@@ -23,29 +24,46 @@ async function invokeCommand<T>(command: string, args?: Record<string, unknown>)
   return invoke<T>(command, args);
 }
 
-const defaultGames: GameInfo[] = [
-  { id: "valorant", name: "Valorant", category: "FPS", executable_path: null, install_path: null, is_installed: false, platform: "riot", image_url: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4fd6a11df4eb2c7c8e368e88b78e97ebb00f4688-1920x1080.jpg" },
-  { id: "league-of-legends", name: "League of Legends", category: "MOBA", executable_path: null, install_path: null, is_installed: false, platform: "riot", image_url: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news/4c44f7838e9c3a6ae8f02fc2f1e5a0ce66e2cf20-1920x1080.jpg" },
-  { id: "cs2", name: "Counter-Strike 2", category: "FPS", executable_path: null, install_path: null, is_installed: false, platform: "steam", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg" },
-  { id: "apex-legends", name: "Apex Legends", category: "Battle Royale", executable_path: null, install_path: null, is_installed: false, platform: "steam", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/1172470/header.jpg" },
-  { id: "dota2", name: "Dota 2", category: "MOBA", executable_path: null, install_path: null, is_installed: false, platform: "steam", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg" },
-  { id: "fortnite", name: "Fortnite", category: "Battle Royale", executable_path: null, install_path: null, is_installed: false, platform: "epic", image_url: "https://cdn2.unrealengine.com/en-eg-desktop-background-1923x1080-1923x1080-828a5d1ebb0f.jpg" },
-  { id: "minecraft", name: "Minecraft", category: "Sandbox", executable_path: null, install_path: null, is_installed: false, platform: "microsoft", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/1672970/header.jpg" },
-  { id: "rocket-league", name: "Rocket League", category: "Sports", executable_path: null, install_path: null, is_installed: false, platform: "epic", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/252950/header.jpg" },
-  { id: "gta5", name: "GTA V", category: "Action", executable_path: null, install_path: null, is_installed: false, platform: "steam", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg" },
-  { id: "pubg", name: "PUBG", category: "Battle Royale", executable_path: null, install_path: null, is_installed: false, platform: "steam", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/578080/header.jpg" },
-  { id: "overwatch2", name: "Overwatch 2", category: "FPS", executable_path: null, install_path: null, is_installed: false, platform: "blizzard", image_url: "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt7f4c77fd14dff1c7/646e51bc2d39af49a3c2e0a4/ow2-homepage-hero-bg.webp" },
-  { id: "fifa24", name: "FIFA 24", category: "Sports", executable_path: null, install_path: null, is_installed: false, platform: "ea", image_url: "https://cdn.akamai.steamstatic.com/steam/apps/2195250/header.jpg" },
-];
+function convertApiGameToGameInfo(apiGame: LauncherGame): GameInfo {
+  return {
+    id: apiGame.id.toString(),
+    name: apiGame.name,
+    category: apiGame.category,
+    executable_path: null,
+    install_path: null,
+    is_installed: false,
+    platform: "custom",
+    image_url: apiGame.imageUrl || "https://via.placeholder.com/460x215?text=Game"
+  };
+}
 
 export function useTauriGames() {
-  const [games, setGames] = useState<GameInfo[]>(defaultGames);
-  const [isLoading, setIsLoading] = useState(false);
+  const [games, setGames] = useState<GameInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
   const [isTauriApp, setIsTauriApp] = useState(false);
 
   useEffect(() => {
     setIsTauriApp(isTauri());
+  }, []);
+
+  useEffect(() => {
+    async function fetchGamesFromApi() {
+      try {
+        const response = await fetch("/api/launcher/games");
+        if (response.ok) {
+          const apiGames: LauncherGame[] = await response.json();
+          const activeGames = apiGames.filter(g => g.isActive);
+          const convertedGames = activeGames.map(convertApiGameToGameInfo);
+          setGames(convertedGames);
+        }
+      } catch (error) {
+        console.error("Failed to fetch games from API:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchGamesFromApi();
   }, []);
 
   const scanForGames = useCallback(async () => {

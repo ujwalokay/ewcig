@@ -1305,7 +1305,7 @@ function HomeContent({ onLaunch, onOrder }: { onLaunch: (name: string) => void; 
 
 // Games Content
 function GamesContent({ onLaunch }: { onLaunch: (name: string, execPath?: string | null) => void }) {
-  const { games: tauriGames, isScanning, isTauriApp, scanForGames, launchGame } = useTauriGames();
+  const { games: tauriGames, isLoading: isGamesLoading, isScanning, isTauriApp, scanForGames, launchGame } = useTauriGames();
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [showInstalledOnly, setShowInstalledOnly] = useState(false);
   
@@ -1372,14 +1372,20 @@ function GamesContent({ onLaunch }: { onLaunch: (name: string, execPath?: string
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {filteredGames.map((game) => (
-          <TauriGameCard 
-            key={game.id} 
-            game={game} 
-            onLaunch={() => handleGameLaunch(game)}
-            isTauriApp={isTauriApp}
-          />
-        ))}
+        {isGamesLoading ? (
+          <div className="col-span-full text-center text-muted-foreground py-12">Loading games...</div>
+        ) : filteredGames.length === 0 ? (
+          <div className="col-span-full text-center text-muted-foreground py-12">No games available. Add games in Launcher Settings.</div>
+        ) : (
+          filteredGames.map((game) => (
+            <TauriGameCard 
+              key={game.id} 
+              game={game} 
+              onLaunch={() => handleGameLaunch(game)}
+              isTauriApp={isTauriApp}
+            />
+          ))
+        )}
       </div>
     </div>
   );
@@ -1460,14 +1466,22 @@ type CartItem = {
 function FoodContent({ onOrder }: { onOrder: (name: string) => void }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
+  
+  const { data: apiFoodItems = [], isLoading: isFoodLoading } = useQuery<LauncherFoodItem[]>({
+    queryKey: ["/api/launcher/food-items"]
+  });
+  
+  const activeFoodItems = apiFoodItems.filter(item => item.isActive);
 
-  const addToCart = (item: typeof foodMenu[0]) => {
+  const addToCart = (item: LauncherFoodItem) => {
+    const numericId = typeof item.id === 'string' ? parseInt(item.id) : item.id;
+    const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
     setCart(prev => {
-      const existing = prev.find(c => c.id === item.id);
+      const existing = prev.find(c => c.id === numericId);
       if (existing) {
-        return prev.map(c => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c);
+        return prev.map(c => c.id === numericId ? { ...c, quantity: c.quantity + 1 } : c);
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { id: numericId, name: item.name, price, category: item.category, quantity: 1 }];
     });
     toast({
       title: "Added to Cart",
@@ -1529,30 +1543,45 @@ function FoodContent({ onOrder }: { onOrder: (name: string) => void }) {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {foodMenu.map((item) => (
-            <div 
-              key={item.id} 
-              className="bg-card border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all group"
-              data-testid={`card-menu-${item.id}`}
-            >
-              <div className="h-24 w-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Utensils className="h-10 w-10 text-primary/80" />
-              </div>
-              <h3 className="font-bold text-white text-center mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
-              <p className="text-sm text-muted-foreground text-center mb-3">{item.category}</p>
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-primary font-mono font-bold text-lg">${item.price.toFixed(2)}</p>
-                <Button 
-                  size="sm" 
-                  className="bg-white/5 hover:bg-primary hover:text-white"
-                  onClick={() => addToCart(item)}
-                  data-testid={`button-add-${item.id}`}
+          {isFoodLoading ? (
+            <div className="col-span-full text-center text-muted-foreground py-12">Loading menu...</div>
+          ) : activeFoodItems.length === 0 ? (
+            <div className="col-span-full text-center text-muted-foreground py-12">No menu items available. Add items in Launcher Settings.</div>
+          ) : (
+            activeFoodItems.map((item) => {
+              const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+              return (
+                <div 
+                  key={item.id} 
+                  className="bg-card border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all group"
+                  data-testid={`card-menu-${item.id}`}
                 >
-                  Add to Cart
-                </Button>
-              </div>
-            </div>
-          ))}
+                  {item.imageUrl ? (
+                    <div className="h-24 w-24 mx-auto rounded-full overflow-hidden mb-4 group-hover:scale-110 transition-transform">
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="h-24 w-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Utensils className="h-10 w-10 text-primary/80" />
+                    </div>
+                  )}
+                  <h3 className="font-bold text-white text-center mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
+                  <p className="text-sm text-muted-foreground text-center mb-3">{item.category}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-primary font-mono font-bold text-lg">${price.toFixed(2)}</p>
+                    <Button 
+                      size="sm" 
+                      className="bg-white/5 hover:bg-primary hover:text-white"
+                      onClick={() => addToCart(item)}
+                      data-testid={`button-add-${item.id}`}
+                    >
+                      Add to Cart
+                    </Button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
