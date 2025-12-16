@@ -152,116 +152,44 @@ function formatTimeRemaining(seconds: number): string {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// Right Sidebar Ads Data
-const sidebarAds = [
-  {
-    id: 1,
-    title: "Logitech G Pro X",
-    subtitle: "Wireless Gaming Mouse",
-    price: "$129.99",
-    discount: "20% OFF",
-    gradient: "from-blue-600 to-cyan-600",
-    image: null
-  },
-  {
-    id: 2,
-    title: "SteelSeries Arctis",
-    subtitle: "Pro Wireless Headset",
-    price: "$299.99",
-    discount: "15% OFF",
-    gradient: "from-purple-600 to-pink-600",
-    image: null
-  },
-  {
-    id: 3,
-    title: "Elgato Stream Deck",
-    subtitle: "Content Creator Essential",
-    price: "$149.99",
-    discount: "NEW",
-    gradient: "from-indigo-600 to-violet-600",
-    image: null
-  },
-  {
-    id: 4,
-    title: "Secretlab Chair",
-    subtitle: "Premium Gaming Comfort",
-    price: "$449.99",
-    discount: "FREE SHIPPING",
-    gradient: "from-orange-600 to-amber-600",
-    image: null
-  },
-  {
-    id: 5,
-    title: "ASUS ROG Monitor",
-    subtitle: "360Hz Gaming Display",
-    price: "$699.99",
-    discount: "HOT",
-    gradient: "from-red-600 to-rose-600",
-    image: null
-  },
-  {
-    id: 6,
-    title: "Corsair K100 RGB",
-    subtitle: "Mechanical Keyboard",
-    price: "$199.99",
-    discount: "BEST SELLER",
-    gradient: "from-teal-600 to-emerald-600",
-    image: null
-  }
+// App Taskbar Data
+const taskbarApps = [
+  { id: 1, name: "Chrome", icon: Chrome, color: "bg-blue-500/20" },
+  { id: 2, name: "Discord", icon: MessageSquare, color: "bg-indigo-500/20" },
+  { id: 3, name: "Spotify", icon: Music, color: "bg-green-500/20" },
+  { id: 4, name: "YouTube", icon: Video, color: "bg-red-500/20" },
+  { id: 5, name: "Calculator", icon: Calculator, color: "bg-gray-500/20" },
+  { id: 6, name: "Files", icon: FileText, color: "bg-purple-500/20" },
 ];
 
-// Right Ads Sidebar Component
-function RightAdsSidebar() {
+// App Taskbar Component
+function AppTaskbar({ onLaunchApp }: { onLaunchApp: (appName: string) => void }) {
   return (
-    <div className="w-72 bg-sidebar border-l border-sidebar-border flex flex-col shrink-0">
-      {/* Header */}
-      <div className="p-4 border-b border-sidebar-border">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          Featured Products
-        </h3>
-        <p className="text-xs text-muted-foreground mt-1">Sponsored deals for gamers</p>
-      </div>
-
-      {/* Ads Cards */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3">
-        {sidebarAds.map((ad) => (
-          <div
-            key={ad.id}
+    <div className="h-16 bg-card/90 backdrop-blur-xl border-t border-white/10 flex items-center justify-center px-4 shrink-0">
+      <div className="flex items-center gap-2">
+        {taskbarApps.map((app) => (
+          <Button
+            key={app.id}
+            size="icon"
+            variant="ghost"
             className={cn(
-              "relative rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-[1.02] border border-white/10 group",
-              `bg-gradient-to-br ${ad.gradient}`
+              "h-12 w-12 rounded-xl transition-all hover:scale-110",
+              app.color
             )}
-            data-testid={`card-sidebar-ad-${ad.id}`}
+            onClick={() => onLaunchApp(app.name)}
+            data-testid={`taskbar-app-${app.id}`}
           >
-            {/* Discount Badge */}
-            <div className="absolute top-2 right-2 z-10">
-              <Badge className="bg-black/60 text-white text-xs font-bold backdrop-blur-sm">
-                {ad.discount}
-              </Badge>
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              <h4 className="text-white font-bold text-sm mb-1 group-hover:text-white/90 transition-colors">
-                {ad.title}
-              </h4>
-              <p className="text-white/70 text-xs mb-3">{ad.subtitle}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-white font-mono font-bold text-lg">{ad.price}</span>
-                <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 backdrop-blur-sm">
-                  View
-                </Button>
-              </div>
-            </div>
-          </div>
+            <app.icon className="h-6 w-6 text-white" />
+          </Button>
         ))}
-      </div>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border">
-        <Button variant="outline" className="w-full border-primary/50 text-primary hover:bg-primary/10 text-sm">
-          View All Deals
+        <div className="w-px h-8 bg-white/10 mx-2" />
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-12 w-12 rounded-xl bg-primary/20 hover:bg-primary/30"
+          data-testid="taskbar-all-apps"
+        >
+          <AppWindow className="h-6 w-6 text-primary" />
         </Button>
       </div>
     </div>
@@ -1117,8 +1045,8 @@ export default function Launcher() {
           </div>
         </header>
 
-        {/* Content Area with Right Ads Sidebar */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* Content Area with App Taskbar */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto custom-scrollbar bg-gradient-to-br from-background via-background to-black p-6 relative">
             {/* Ambient Background Effect */}
@@ -1138,8 +1066,13 @@ export default function Launcher() {
             </div>
           </div>
 
-          {/* Right Ads Sidebar */}
-          <RightAdsSidebar />
+          {/* App Taskbar */}
+          <AppTaskbar onLaunchApp={(appName) => {
+            toast({
+              title: "Launching App",
+              description: `Opening ${appName}...`,
+            });
+          }} />
         </div>
       </div>
     </div>
