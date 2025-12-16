@@ -1,8 +1,44 @@
 import type { Express } from "express";
 import { type Server } from "http";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
-import { insertMemberSchema, insertTerminalSchema, insertGameSchema, insertStoreItemSchema, insertSessionSchema, insertActivityLogSchema, insertTimePackageSchema, insertHappyHourSchema, insertNotificationSchema } from "@shared/schema";
+import { 
+  insertMemberSchema, insertTerminalSchema, insertGameSchema, insertStoreItemSchema, 
+  insertSessionSchema, insertActivityLogSchema, insertTimePackageSchema, insertHappyHourSchema, 
+  insertNotificationSchema, insertLauncherGameSchema, insertLauncherFoodItemSchema,
+  insertLauncherTournamentSchema, insertLauncherRewardSchema, insertLauncherAppSchema
+} from "@shared/schema";
 import { z } from "zod";
+
+const uploadsDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const uploadStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: uploadStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.'));
+    }
+  }
+});
 
 export async function registerRoutes(
   httpServer: Server,
@@ -524,6 +560,209 @@ export async function registerRoutes(
     await storage.createActivityLog({ type: "system", message: "System initialized with seed data" });
 
     res.json({ message: "Seed data created successfully" });
+  });
+
+  // Image Upload
+  app.post("/api/uploads", upload.single("image"), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: imageUrl, filename: req.file.filename });
+  });
+
+  // Serve uploaded files
+  app.use("/uploads", (req, res, next) => {
+    const filePath = path.join(uploadsDir, req.path);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      next();
+    }
+  });
+
+  // ========== Launcher Content Routes (Public - read only) ==========
+  
+  // Public Launcher Games
+  app.get("/api/launcher/games", async (_req, res) => {
+    const games = await storage.getLauncherGames();
+    res.json(games);
+  });
+
+  // Public Launcher Food Items
+  app.get("/api/launcher/food", async (_req, res) => {
+    const items = await storage.getLauncherFoodItems();
+    res.json(items);
+  });
+
+  // Public Launcher Tournaments
+  app.get("/api/launcher/tournaments", async (_req, res) => {
+    const tournaments = await storage.getLauncherTournaments();
+    res.json(tournaments);
+  });
+
+  // Public Launcher Rewards
+  app.get("/api/launcher/rewards", async (_req, res) => {
+    const rewards = await storage.getLauncherRewards();
+    res.json(rewards);
+  });
+
+  // Public Launcher Apps
+  app.get("/api/launcher/apps", async (_req, res) => {
+    const apps = await storage.getLauncherApps();
+    res.json(apps);
+  });
+
+  // ========== Admin Launcher Content Routes (CRUD) ==========
+  
+  // Admin Launcher Games
+  app.get("/api/admin/launcher/games", async (_req, res) => {
+    const games = await storage.getLauncherGames();
+    res.json(games);
+  });
+
+  app.get("/api/admin/launcher/games/:id", async (req, res) => {
+    const game = await storage.getLauncherGame(req.params.id);
+    if (!game) return res.status(404).json({ message: "Game not found" });
+    res.json(game);
+  });
+
+  app.post("/api/admin/launcher/games", async (req, res) => {
+    const parsed = insertLauncherGameSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const game = await storage.createLauncherGame(parsed.data);
+    res.status(201).json(game);
+  });
+
+  app.patch("/api/admin/launcher/games/:id", async (req, res) => {
+    const game = await storage.updateLauncherGame(req.params.id, req.body);
+    if (!game) return res.status(404).json({ message: "Game not found" });
+    res.json(game);
+  });
+
+  app.delete("/api/admin/launcher/games/:id", async (req, res) => {
+    await storage.deleteLauncherGame(req.params.id);
+    res.status(204).send();
+  });
+
+  // Admin Launcher Food Items
+  app.get("/api/admin/launcher/food", async (_req, res) => {
+    const items = await storage.getLauncherFoodItems();
+    res.json(items);
+  });
+
+  app.get("/api/admin/launcher/food/:id", async (req, res) => {
+    const item = await storage.getLauncherFoodItem(req.params.id);
+    if (!item) return res.status(404).json({ message: "Food item not found" });
+    res.json(item);
+  });
+
+  app.post("/api/admin/launcher/food", async (req, res) => {
+    const parsed = insertLauncherFoodItemSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const item = await storage.createLauncherFoodItem(parsed.data);
+    res.status(201).json(item);
+  });
+
+  app.patch("/api/admin/launcher/food/:id", async (req, res) => {
+    const item = await storage.updateLauncherFoodItem(req.params.id, req.body);
+    if (!item) return res.status(404).json({ message: "Food item not found" });
+    res.json(item);
+  });
+
+  app.delete("/api/admin/launcher/food/:id", async (req, res) => {
+    await storage.deleteLauncherFoodItem(req.params.id);
+    res.status(204).send();
+  });
+
+  // Admin Launcher Tournaments
+  app.get("/api/admin/launcher/tournaments", async (_req, res) => {
+    const tournaments = await storage.getLauncherTournaments();
+    res.json(tournaments);
+  });
+
+  app.get("/api/admin/launcher/tournaments/:id", async (req, res) => {
+    const tournament = await storage.getLauncherTournament(req.params.id);
+    if (!tournament) return res.status(404).json({ message: "Tournament not found" });
+    res.json(tournament);
+  });
+
+  app.post("/api/admin/launcher/tournaments", async (req, res) => {
+    const parsed = insertLauncherTournamentSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const tournament = await storage.createLauncherTournament(parsed.data);
+    res.status(201).json(tournament);
+  });
+
+  app.patch("/api/admin/launcher/tournaments/:id", async (req, res) => {
+    const tournament = await storage.updateLauncherTournament(req.params.id, req.body);
+    if (!tournament) return res.status(404).json({ message: "Tournament not found" });
+    res.json(tournament);
+  });
+
+  app.delete("/api/admin/launcher/tournaments/:id", async (req, res) => {
+    await storage.deleteLauncherTournament(req.params.id);
+    res.status(204).send();
+  });
+
+  // Admin Launcher Rewards
+  app.get("/api/admin/launcher/rewards", async (_req, res) => {
+    const rewards = await storage.getLauncherRewards();
+    res.json(rewards);
+  });
+
+  app.get("/api/admin/launcher/rewards/:id", async (req, res) => {
+    const reward = await storage.getLauncherReward(req.params.id);
+    if (!reward) return res.status(404).json({ message: "Reward not found" });
+    res.json(reward);
+  });
+
+  app.post("/api/admin/launcher/rewards", async (req, res) => {
+    const parsed = insertLauncherRewardSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const reward = await storage.createLauncherReward(parsed.data);
+    res.status(201).json(reward);
+  });
+
+  app.patch("/api/admin/launcher/rewards/:id", async (req, res) => {
+    const reward = await storage.updateLauncherReward(req.params.id, req.body);
+    if (!reward) return res.status(404).json({ message: "Reward not found" });
+    res.json(reward);
+  });
+
+  app.delete("/api/admin/launcher/rewards/:id", async (req, res) => {
+    await storage.deleteLauncherReward(req.params.id);
+    res.status(204).send();
+  });
+
+  // Admin Launcher Apps
+  app.get("/api/admin/launcher/apps", async (_req, res) => {
+    const apps = await storage.getLauncherApps();
+    res.json(apps);
+  });
+
+  app.get("/api/admin/launcher/apps/:id", async (req, res) => {
+    const app = await storage.getLauncherApp(req.params.id);
+    if (!app) return res.status(404).json({ message: "App not found" });
+    res.json(app);
+  });
+
+  app.post("/api/admin/launcher/apps", async (req, res) => {
+    const parsed = insertLauncherAppSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.message });
+    const newApp = await storage.createLauncherApp(parsed.data);
+    res.status(201).json(newApp);
+  });
+
+  app.patch("/api/admin/launcher/apps/:id", async (req, res) => {
+    const updatedApp = await storage.updateLauncherApp(req.params.id, req.body);
+    if (!updatedApp) return res.status(404).json({ message: "App not found" });
+    res.json(updatedApp);
+  });
+
+  app.delete("/api/admin/launcher/apps/:id", async (req, res) => {
+    await storage.deleteLauncherApp(req.params.id);
+    res.status(204).send();
   });
 
   return httpServer;
