@@ -142,6 +142,122 @@ function formatTimeRemaining(seconds: number): string {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
+// Right Sidebar Ads Data
+const sidebarAds = [
+  {
+    id: 1,
+    title: "Logitech G Pro X",
+    subtitle: "Wireless Gaming Mouse",
+    price: "$129.99",
+    discount: "20% OFF",
+    gradient: "from-blue-600 to-cyan-600",
+    image: null
+  },
+  {
+    id: 2,
+    title: "SteelSeries Arctis",
+    subtitle: "Pro Wireless Headset",
+    price: "$299.99",
+    discount: "15% OFF",
+    gradient: "from-purple-600 to-pink-600",
+    image: null
+  },
+  {
+    id: 3,
+    title: "Elgato Stream Deck",
+    subtitle: "Content Creator Essential",
+    price: "$149.99",
+    discount: "NEW",
+    gradient: "from-indigo-600 to-violet-600",
+    image: null
+  },
+  {
+    id: 4,
+    title: "Secretlab Chair",
+    subtitle: "Premium Gaming Comfort",
+    price: "$449.99",
+    discount: "FREE SHIPPING",
+    gradient: "from-orange-600 to-amber-600",
+    image: null
+  },
+  {
+    id: 5,
+    title: "ASUS ROG Monitor",
+    subtitle: "360Hz Gaming Display",
+    price: "$699.99",
+    discount: "HOT",
+    gradient: "from-red-600 to-rose-600",
+    image: null
+  },
+  {
+    id: 6,
+    title: "Corsair K100 RGB",
+    subtitle: "Mechanical Keyboard",
+    price: "$199.99",
+    discount: "BEST SELLER",
+    gradient: "from-teal-600 to-emerald-600",
+    image: null
+  }
+];
+
+// Right Ads Sidebar Component
+function RightAdsSidebar() {
+  return (
+    <div className="w-72 bg-sidebar border-l border-sidebar-border flex flex-col shrink-0">
+      {/* Header */}
+      <div className="p-4 border-b border-sidebar-border">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          Featured Products
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">Sponsored deals for gamers</p>
+      </div>
+
+      {/* Ads Cards */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3">
+        {sidebarAds.map((ad) => (
+          <div
+            key={ad.id}
+            className={cn(
+              "relative rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-[1.02] border border-white/10 group",
+              `bg-gradient-to-br ${ad.gradient}`
+            )}
+            data-testid={`card-sidebar-ad-${ad.id}`}
+          >
+            {/* Discount Badge */}
+            <div className="absolute top-2 right-2 z-10">
+              <Badge className="bg-black/60 text-white text-xs font-bold backdrop-blur-sm">
+                {ad.discount}
+              </Badge>
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+              <h4 className="text-white font-bold text-sm mb-1 group-hover:text-white/90 transition-colors">
+                {ad.title}
+              </h4>
+              <p className="text-white/70 text-xs mb-3">{ad.subtitle}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-white font-mono font-bold text-lg">{ad.price}</span>
+                <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white text-xs px-3 backdrop-blur-sm">
+                  View
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-sidebar-border">
+        <Button variant="outline" className="w-full border-primary/50 text-primary hover:bg-primary/10 text-sm">
+          View All Deals
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function Launcher() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isLocked, setIsLocked] = useState(true);
@@ -991,23 +1107,29 @@ export default function Launcher() {
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-gradient-to-br from-background via-background to-black p-6 relative">
-          {/* Ambient Background Effect */}
-          <div className="absolute top-0 left-0 w-full h-[600px] bg-primary/5 blur-[150px] pointer-events-none" />
-          
-          <div className="relative z-10">
-            {activeTab === "home" && <HomeContent onLaunch={handleLaunch} onOrder={handleOrder} />}
-            {activeTab === "games" && <GamesContent onLaunch={handleLaunch} />}
-            {activeTab === "apps" && <AppsContent />}
-            {activeTab === "food" && <FoodContent onOrder={handleOrder} />}
-            {activeTab === "rewards" && <RewardsContent />}
-            {activeTab === "tournaments" && <TournamentsContent />}
-            {activeTab === "friends" && <FriendsContent />}
-            {activeTab === "profile" && <ProfileContent />}
-            {activeTab === "settings" && <SettingsContent />}
-            {activeTab === "help" && <HelpContent />}
+        {/* Content Area with Right Ads Sidebar */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar bg-gradient-to-br from-background via-background to-black p-6 relative">
+            {/* Ambient Background Effect */}
+            <div className="absolute top-0 left-0 w-full h-[600px] bg-primary/5 blur-[150px] pointer-events-none" />
+            
+            <div className="relative z-10">
+              {activeTab === "home" && <HomeContent onLaunch={handleLaunch} onOrder={handleOrder} />}
+              {activeTab === "games" && <GamesContent onLaunch={handleLaunch} />}
+              {activeTab === "apps" && <AppsContent />}
+              {activeTab === "food" && <FoodContent onOrder={handleOrder} />}
+              {activeTab === "rewards" && <RewardsContent />}
+              {activeTab === "tournaments" && <TournamentsContent />}
+              {activeTab === "friends" && <FriendsContent />}
+              {activeTab === "profile" && <ProfileContent />}
+              {activeTab === "settings" && <SettingsContent />}
+              {activeTab === "help" && <HelpContent />}
+            </div>
           </div>
+
+          {/* Right Ads Sidebar */}
+          <RightAdsSidebar />
         </div>
       </div>
     </div>
