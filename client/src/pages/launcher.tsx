@@ -14,7 +14,7 @@ import {
   Trophy, Settings, HelpCircle, Gift, Users, AppWindow,
   Chrome, Music, Video, FileText, Calculator, Camera, MessageSquare, Mail,
   X, Minus, Plus, Trash2, QrCode, Keyboard, ChevronRight,
-  Crosshair, Sword, Target, Flame, Pickaxe, Car, Swords, Globe, type LucideIcon
+  Crosshair, Sword, Target, Flame, Pickaxe, Car, Swords, Globe, Sparkles, type LucideIcon
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -1014,8 +1014,85 @@ export default function Launcher() {
   );
 }
 
+// Promotional Ads Data for Gamers
+const promotionalAds = [
+  {
+    id: 1,
+    title: "Game Pass Ultimate",
+    subtitle: "3 Months Free",
+    description: "Get unlimited access to 100+ premium games with Xbox Game Pass",
+    cta: "Claim Now",
+    gradient: "from-green-600 to-emerald-700",
+    badge: "HOT DEAL",
+    badgeColor: "bg-red-500"
+  },
+  {
+    id: 2,
+    title: "Razer Gaming Gear",
+    subtitle: "30% Off All Peripherals",
+    description: "Level up your setup with pro-grade mice, keyboards & headsets",
+    cta: "Shop Now",
+    gradient: "from-green-500 to-lime-600",
+    badge: "LIMITED",
+    badgeColor: "bg-yellow-500"
+  },
+  {
+    id: 3,
+    title: "Monster Energy",
+    subtitle: "Buy 2 Get 1 Free",
+    description: "Fuel your gaming sessions with ice-cold energy drinks at the counter",
+    cta: "Order Now",
+    gradient: "from-lime-500 to-green-600",
+    badge: "IN-STORE",
+    badgeColor: "bg-green-500"
+  },
+  {
+    id: 4,
+    title: "NVIDIA RTX 5090",
+    subtitle: "Pre-Order Now",
+    description: "Experience next-gen gaming with ray tracing & DLSS 4.0",
+    cta: "Learn More",
+    gradient: "from-emerald-600 to-teal-700",
+    badge: "NEW",
+    badgeColor: "bg-blue-500"
+  }
+];
+
+const sponsoredContent = [
+  {
+    id: 1,
+    sponsor: "Intel Gaming",
+    title: "Core i9 Gaming Rigs",
+    description: "Ultimate performance for competitive gaming",
+    gradient: "from-blue-600 to-indigo-700"
+  },
+  {
+    id: 2,
+    sponsor: "HyperX",
+    title: "Cloud III Headset",
+    description: "Crystal clear audio for immersive gameplay",
+    gradient: "from-red-600 to-rose-700"
+  },
+  {
+    id: 3,
+    sponsor: "G FUEL",
+    title: "New Flavor Drop",
+    description: "Try our latest gaming energy formula",
+    gradient: "from-pink-500 to-purple-600"
+  }
+];
+
 // Home Content
 function HomeContent({ onLaunch, onOrder }: { onLaunch: (name: string) => void; onOrder: (name: string) => void }) {
+  const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentPromoIndex((prev) => (prev + 1) % promotionalAds.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="space-y-8">
       {/* Hero Section */}
@@ -1034,6 +1111,74 @@ function HomeContent({ onLaunch, onOrder }: { onLaunch: (name: string) => void; 
           <h2 className="text-4xl font-display font-bold text-white mb-2">Weekend Tournament</h2>
           <p className="text-gray-300 max-w-xl mb-6">Join the server-wide 5v5 battle this Saturday. Prize pool includes 100 hours of game time and exclusive skins.</p>
           <Button className="bg-white text-black hover:bg-gray-200 font-bold px-8" data-testid="button-register-tournament">REGISTER NOW</Button>
+        </div>
+      </div>
+
+      {/* Featured Promotions & Ads Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-display font-bold text-white flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Featured Deals & Promotions
+          </h3>
+          <div className="flex items-center gap-2">
+            {promotionalAds.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentPromoIndex(idx)}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-all",
+                  currentPromoIndex === idx ? "bg-primary w-4" : "bg-white/30"
+                )}
+                data-testid={`button-promo-dot-${idx}`}
+              />
+            ))}
+          </div>
+        </div>
+        
+        {/* Main Promo Carousel */}
+        <div className="relative h-[160px] rounded-xl overflow-hidden mb-4 border border-white/10">
+          {promotionalAds.map((ad, idx) => (
+            <div
+              key={ad.id}
+              className={cn(
+                "absolute inset-0 transition-all duration-500 p-6 flex items-center justify-between",
+                `bg-gradient-to-r ${ad.gradient}`,
+                currentPromoIndex === idx ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"
+              )}
+              data-testid={`card-promo-${ad.id}`}
+            >
+              <div className="flex-1">
+                <Badge className={cn("text-white text-xs font-bold mb-2", ad.badgeColor)}>
+                  {ad.badge}
+                </Badge>
+                <h4 className="text-3xl font-display font-bold text-white mb-1">{ad.title}</h4>
+                <p className="text-white/90 text-lg font-semibold mb-1">{ad.subtitle}</p>
+                <p className="text-white/70 text-sm max-w-md">{ad.description}</p>
+              </div>
+              <Button className="bg-white text-black hover:bg-gray-100 font-bold px-6" data-testid={`button-promo-cta-${ad.id}`}>
+                {ad.cta}
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        {/* Sponsored Content Grid */}
+        <div className="grid grid-cols-3 gap-4">
+          {sponsoredContent.map((item) => (
+            <div
+              key={item.id}
+              className={cn(
+                "relative rounded-lg overflow-hidden p-4 cursor-pointer transition-transform hover:scale-[1.02] border border-white/10",
+                `bg-gradient-to-br ${item.gradient}`
+              )}
+              data-testid={`card-sponsored-${item.id}`}
+            >
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-1">Sponsored by {item.sponsor}</p>
+              <h5 className="text-white font-bold text-lg mb-1">{item.title}</h5>
+              <p className="text-white/80 text-sm">{item.description}</p>
+            </div>
+          ))}
         </div>
       </div>
 
