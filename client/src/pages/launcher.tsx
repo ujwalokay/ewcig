@@ -937,149 +937,152 @@ export default function Launcher() {
           )}
         </div>
 
-        {/* Right Side Full Widget - Profile, Timer, Action Buttons */}
-        <div className="relative z-50 w-20 bg-gradient-to-b from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-md border-l border-gray-600/50 flex flex-col items-center py-3 gap-2">
-          {/* Logo */}
-          <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center shadow-lg mb-1">
-            <div className="h-10 w-10 bg-primary rounded-md flex items-center justify-center text-white font-display font-bold text-xl skew-x-[-5deg]">
-              G
+        {/* Right Side Full Widget - Profile, Timer, Action Buttons - PREMIUM PURPLE THEME */}
+        <div className="relative z-50 w-20 flex flex-col items-center py-3 gap-2">
+          <div className="absolute -inset-0.5 bg-gradient-to-b from-purple-600/40 via-violet-600/30 to-purple-600/40 blur-sm" />
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl border-l border-purple-500/30" />
+          
+          <div className="relative z-10 flex flex-col items-center w-full h-full py-3 gap-2">
+            {/* Logo */}
+            <div className="h-12 w-12 bg-gradient-to-br from-purple-600 to-violet-700 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)] mb-1 border border-purple-400/30">
+              <span className="text-white font-display font-bold text-xl">G</span>
             </div>
-          </div>
 
-          {/* Profile */}
-          <div className="flex flex-col items-center gap-1 py-2 border-b border-gray-600/50 w-full">
-            <Avatar className="h-12 w-12 border-2 border-primary/50">
-              {isGuest ? (
-                <AvatarFallback className="bg-gray-600 text-white">
-                  <User className="h-5 w-5" />
-                </AvatarFallback>
-              ) : (
-                <>
-                  <AvatarImage src="https://i.pravatar.cc/150?u=gamer123" />
-                  <AvatarFallback className="bg-primary text-white text-sm">
-                    {loggedInUser ? loggedInUser.slice(0, 2).toUpperCase() : "PG"}
+            {/* Profile */}
+            <div className="flex flex-col items-center gap-1 py-2 border-b border-purple-500/30 w-full">
+              <Avatar className="h-12 w-12 border-2 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                {isGuest ? (
+                  <AvatarFallback className="bg-purple-900/50 text-purple-300">
+                    <User className="h-5 w-5" />
                   </AvatarFallback>
-                </>
-              )}
-            </Avatar>
-            <p className="font-display font-bold text-white text-[10px] leading-tight text-center truncate w-full px-1">
-              {isGuest ? "Guest" : loggedInUser || "ProGamer"}
-            </p>
-            <Badge className={cn(
-              "text-[8px] py-0 h-3.5",
-              isGuest 
-                ? "bg-gray-500/30 text-gray-300 border-gray-500/50"
-                : "bg-yellow-500/30 text-yellow-400 border-yellow-500/50"
-            )}>
-              {isGuest ? "Guest" : "Gold"}
-            </Badge>
-          </div>
+                ) : (
+                  <>
+                    <AvatarImage src="https://i.pravatar.cc/150?u=gamer123" />
+                    <AvatarFallback className="bg-gradient-to-br from-purple-600 to-violet-700 text-white text-sm">
+                      {loggedInUser ? loggedInUser.slice(0, 2).toUpperCase() : "PG"}
+                    </AvatarFallback>
+                  </>
+                )}
+              </Avatar>
+              <p className="font-display font-bold text-white text-[10px] leading-tight text-center truncate w-full px-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.3)]">
+                {isGuest ? "Guest" : loggedInUser || "ProGamer"}
+              </p>
+              <Badge className={cn(
+                "text-[8px] py-0 h-3.5",
+                isGuest 
+                  ? "bg-purple-900/50 text-purple-300 border-purple-500/50"
+                  : "bg-purple-500/30 text-purple-300 border-purple-400/50"
+              )}>
+                {isGuest ? "Guest" : "Gold"}
+              </Badge>
+            </div>
 
-          {/* Session Time */}
-          <div className="flex flex-col items-center py-2 border-b border-gray-600/50 w-full">
-            <Clock className="h-5 w-5 text-primary mb-1" />
-            <p className="text-[7px] text-gray-400 uppercase tracking-wider leading-none">Time Left</p>
-            <p className={cn(
-              "text-xs font-mono font-bold leading-tight",
-              isUnlimited ? "text-emerald-400" : "text-white"
-            )} data-testid="text-session-time">
-              {isUnlimited ? "UNLIM" : sessionTimeLeft}
-            </p>
-          </div>
+            {/* Session Time */}
+            <div className="flex flex-col items-center py-2 border-b border-purple-500/30 w-full">
+              <Clock className="h-5 w-5 text-purple-400 mb-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]" />
+              <p className="text-[7px] text-purple-300/60 uppercase tracking-wider leading-none">Time Left</p>
+              <p className={cn(
+                "text-xs font-mono font-bold leading-tight",
+                isUnlimited ? "text-emerald-400" : "text-white drop-shadow-[0_0_5px_rgba(168,85,247,0.3)]"
+              )} data-testid="text-session-time">
+                {isUnlimited ? "UNLIM" : sessionTimeLeft}
+              </p>
+            </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col items-center gap-2 py-2 flex-1">
-            <Button 
-              size="icon"
-              className="w-11 h-11 bg-gradient-to-br from-orange-600 to-orange-700 text-white rounded-xl shadow-lg"
-              onClick={() => setActiveTab("food")}
-              data-testid="widget-btn-food"
-            >
-              <Utensils className="h-5 w-5" />
-            </Button>
-            
-            <Button 
-              size="icon"
-              className="w-11 h-11 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-xl shadow-lg"
-              onClick={() => setActiveTab("tournaments")}
-              data-testid="widget-btn-tournament"
-            >
-              <Trophy className="h-5 w-5" />
-            </Button>
-            
-            <Button 
-              size="icon"
-              className="w-11 h-11 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl shadow-lg"
-              onClick={() => setActiveTab("games")}
-              data-testid="widget-btn-games"
-            >
-              <Gamepad2 className="h-5 w-5" />
-            </Button>
-            
-            <Button 
-              size="icon"
-              className="w-11 h-11 bg-gradient-to-br from-green-600 to-green-700 text-white rounded-xl shadow-lg"
-              onClick={() => setActiveTab("rewards")}
-              data-testid="widget-btn-rewards"
-            >
-              <Gift className="h-5 w-5" />
-            </Button>
+            {/* Action Buttons - All Purple Theme */}
+            <div className="flex flex-col items-center gap-2 py-2 flex-1 overflow-y-auto custom-scrollbar">
+              <Button 
+                size="icon"
+                className="w-11 h-11 bg-purple-500/20 text-purple-300 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.2)] border border-purple-500/30 hover:bg-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all"
+                onClick={() => setActiveTab("food")}
+                data-testid="widget-btn-food"
+              >
+                <Utensils className="h-5 w-5" />
+              </Button>
+              
+              <Button 
+                size="icon"
+                className="w-11 h-11 bg-violet-500/20 text-violet-300 rounded-xl shadow-[0_0_15px_rgba(139,92,246,0.2)] border border-violet-500/30 hover:bg-violet-500/30 hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all"
+                onClick={() => setActiveTab("tournaments")}
+                data-testid="widget-btn-tournament"
+              >
+                <Trophy className="h-5 w-5" />
+              </Button>
+              
+              <Button 
+                size="icon"
+                className="w-11 h-11 bg-fuchsia-500/20 text-fuchsia-300 rounded-xl shadow-[0_0_15px_rgba(217,70,239,0.2)] border border-fuchsia-500/30 hover:bg-fuchsia-500/30 hover:shadow-[0_0_20px_rgba(217,70,239,0.4)] transition-all"
+                onClick={() => setActiveTab("games")}
+                data-testid="widget-btn-games"
+              >
+                <Gamepad2 className="h-5 w-5" />
+              </Button>
+              
+              <Button 
+                size="icon"
+                className="w-11 h-11 bg-purple-500/20 text-purple-300 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.2)] border border-purple-500/30 hover:bg-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all"
+                onClick={() => setActiveTab("rewards")}
+                data-testid="widget-btn-rewards"
+              >
+                <Gift className="h-5 w-5" />
+              </Button>
 
-            <Button 
-              size="icon"
-              className="w-11 h-11 bg-gradient-to-br from-cyan-600 to-cyan-700 text-white rounded-xl shadow-lg"
-              onClick={() => setActiveTab("apps")}
-              data-testid="widget-btn-apps"
-            >
-              <AppWindow className="h-5 w-5" />
-            </Button>
+              <Button 
+                size="icon"
+                className="w-11 h-11 bg-violet-500/20 text-violet-300 rounded-xl shadow-[0_0_15px_rgba(139,92,246,0.2)] border border-violet-500/30 hover:bg-violet-500/30 hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all"
+                onClick={() => setActiveTab("apps")}
+                data-testid="widget-btn-apps"
+              >
+                <AppWindow className="h-5 w-5" />
+              </Button>
 
-            <Button 
-              size="icon"
-              className="w-11 h-11 bg-gradient-to-br from-pink-600 to-pink-700 text-white rounded-xl shadow-lg"
-              onClick={() => setActiveTab("friends")}
-              data-testid="widget-btn-friends"
-            >
-              <Users className="h-5 w-5" />
-            </Button>
-          </div>
+              <Button 
+                size="icon"
+                className="w-11 h-11 bg-fuchsia-500/20 text-fuchsia-300 rounded-xl shadow-[0_0_15px_rgba(217,70,239,0.2)] border border-fuchsia-500/30 hover:bg-fuchsia-500/30 hover:shadow-[0_0_20px_rgba(217,70,239,0.4)] transition-all"
+                onClick={() => setActiveTab("friends")}
+                data-testid="widget-btn-friends"
+              >
+                <Users className="h-5 w-5" />
+              </Button>
+            </div>
 
-          {/* Bottom Actions - Commands, Order, Logout */}
-          <div className="flex flex-col items-center gap-2 pt-2 border-t border-gray-600/50 w-full">
-            <Button 
-              size="icon"
-              variant="outline"
-              className="w-11 h-11 bg-gray-700/50 border-gray-500/50 text-white rounded-xl"
-              onClick={() => {
-                toast({
-                  title: "Commands",
-                  description: "Opening command menu...",
-                });
-              }}
-              data-testid="widget-btn-commands"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-            
-            <Button 
-              size="icon"
-              variant="outline"
-              className="w-11 h-11 bg-gray-700/50 border-gray-500/50 text-white rounded-xl"
-              onClick={() => setActiveTab("food")}
-              data-testid="widget-btn-give-order"
-            >
-              <ShoppingCart className="h-5 w-5" />
-            </Button>
+            {/* Bottom Actions - Commands, Order, Logout */}
+            <div className="flex flex-col items-center gap-2 pt-2 border-t border-purple-500/30 w-full">
+              <Button 
+                size="icon"
+                variant="outline"
+                className="w-11 h-11 bg-purple-900/30 border-purple-500/40 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-all"
+                onClick={() => {
+                  toast({
+                    title: "Commands",
+                    description: "Opening command menu...",
+                  });
+                }}
+                data-testid="widget-btn-commands"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+              
+              <Button 
+                size="icon"
+                variant="outline"
+                className="w-11 h-11 bg-purple-900/30 border-purple-500/40 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-all"
+                onClick={() => setActiveTab("food")}
+                data-testid="widget-btn-give-order"
+              >
+                <ShoppingCart className="h-5 w-5" />
+              </Button>
 
-            <Button 
-              size="icon"
-              variant="outline"
-              className="w-11 h-11 bg-red-900/50 border-red-500/50 text-red-400 rounded-xl"
-              onClick={handleLogout}
-              data-testid="widget-btn-logout"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
+              <Button 
+                size="icon"
+                variant="outline"
+                className="w-11 h-11 bg-red-900/30 border-red-500/40 text-red-400 rounded-xl hover:bg-red-500/30 transition-all"
+                onClick={handleLogout}
+                data-testid="widget-btn-logout"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
