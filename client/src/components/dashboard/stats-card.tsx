@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
@@ -14,37 +13,51 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, icon: Icon, trend, trendUp, className, description }: StatsCardProps) {
   return (
-    <Card className={cn("bg-transparent border border-primary/20 shadow-lg shadow-primary/5 relative overflow-hidden group backdrop-blur-sm", className)}>
-      <div className="absolute top-0 right-0 p-3 opacity-15 group-hover:opacity-25 transition-opacity">
-        <Icon className="h-20 w-20 -mr-2 -mt-2 transform rotate-12 text-primary" />
-      </div>
+    <div className={cn(
+      "relative group",
+      className
+    )}>
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 via-violet-600 to-purple-600 rounded-xl opacity-30 group-hover:opacity-60 blur-sm transition-all duration-300" />
       
-      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-          {title}
-        </CardTitle>
-        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/30 shadow-[0_0_15px_rgba(147,51,234,0.2)]">
-          <Icon className="h-5 w-5" />
+      <div className="relative bg-black/90 backdrop-blur-xl rounded-xl border border-purple-500/30 p-4 h-full overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 opacity-10 group-hover:opacity-20 transition-opacity">
+          <Icon className="w-full h-full text-purple-400" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold font-display tracking-tight text-white mb-1">{value}</div>
-        {(trend || description) && (
-          <p className="text-xs text-muted-foreground flex items-center gap-2">
-            {trend && (
-              <span className={cn(
-                "flex items-center font-medium",
-                trendUp ? "text-emerald-400" : "text-primary"
-              )}>
-                {trendUp ? "↑" : "↓"} {trend}
-              </span>
-            )}
-            {description && <span>{description}</span>}
-          </p>
-        )}
-      </CardContent>
-      
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-    </Card>
+        
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-transparent to-violet-900/10 pointer-events-none" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <span className="text-xs font-medium text-purple-300/70 uppercase tracking-widest">
+              {title}
+            </span>
+            <div className="h-9 w-9 rounded-lg bg-purple-500/20 flex items-center justify-center border border-purple-500/40 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+              <Icon className="h-4 w-4 text-purple-400" />
+            </div>
+          </div>
+          
+          <div className="text-3xl font-bold font-display tracking-tight text-white mb-2 drop-shadow-[0_0_10px_rgba(168,85,247,0.3)]">
+            {value}
+          </div>
+          
+          {(trend || description) && (
+            <p className="text-xs flex items-center gap-2">
+              {trend && (
+                <span className={cn(
+                  "flex items-center font-medium",
+                  trendUp ? "text-emerald-400" : "text-purple-400"
+                )}>
+                  {trendUp ? "↑" : "↓"} {trend}
+                </span>
+              )}
+              {description && <span className="text-purple-300/60">{description}</span>}
+            </p>
+          )}
+        </div>
+        
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-purple-400/80 blur-sm" />
+      </div>
+    </div>
   );
 }

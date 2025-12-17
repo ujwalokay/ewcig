@@ -98,24 +98,28 @@ export default function Dashboard() {
           
           {/* Left Column: PC Grid (Takes up 3 cols) */}
           <div className="xl:col-span-3 space-y-6">
-            <div className="bg-card/50 border border-white/5 rounded-xl p-6 backdrop-blur-sm shadow-xl relative overflow-hidden">
-               {/* Decorative background image blended in */}
-               <div 
-                  className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay"
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/30 via-violet-600/20 to-purple-600/30 rounded-xl blur-sm" />
+              <div className="relative bg-black/80 border border-purple-500/20 rounded-xl p-6 backdrop-blur-xl shadow-xl overflow-hidden">
+                <div 
+                  className="absolute inset-0 opacity-5 pointer-events-none mix-blend-overlay"
                   style={{ 
                     backgroundImage: `url(${generatedImage})`, 
                     backgroundSize: 'cover', 
                     backgroundPosition: 'center' 
                   }} 
                 />
-                
-              <PCGrid />
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-violet-900/10 pointer-events-none" />
+                <PCGrid />
+              </div>
             </div>
 
             {/* Game Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-card border border-border rounded-xl p-6 h-64 flex flex-col">
-                <h3 className="text-lg font-display font-semibold text-white mb-4">Top Games Playing</h3>
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-violet-600/20 rounded-xl blur-sm opacity-50" />
+                <div className="relative bg-black/80 border border-purple-500/20 rounded-xl p-6 h-64 flex flex-col backdrop-blur-xl">
+                  <h3 className="text-lg font-display font-semibold text-white mb-4 drop-shadow-[0_0_10px_rgba(168,85,247,0.2)]">Top Games Playing</h3>
                 <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                   {stats?.topGames && stats.topGames.length > 0 ? (
                     stats.topGames.map((game, i) => (
@@ -133,13 +137,16 @@ export default function Dashboard() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-muted-foreground text-sm">No games currently being played</p>
+                    <p className="text-purple-300/60 text-sm">No games currently being played</p>
                   )}
                 </div>
               </div>
+              </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 h-64 flex flex-col">
-                <h3 className="text-lg font-display font-semibold text-white mb-4">Hardware Alerts</h3>
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-violet-600/20 rounded-xl blur-sm opacity-50" />
+                <div className="relative bg-black/80 border border-purple-500/20 rounded-xl p-6 h-64 flex flex-col backdrop-blur-xl">
+                  <h3 className="text-lg font-display font-semibold text-white mb-4 drop-shadow-[0_0_10px_rgba(168,85,247,0.2)]">Hardware Alerts</h3>
                 <div className="space-y-3 overflow-y-auto">
                   {maintenanceTerminals.length > 0 || offlineTerminals.length > 0 ? (
                     <>
@@ -165,18 +172,21 @@ export default function Dashboard() {
                       ))}
                     </>
                   ) : (
-                    <p className="text-muted-foreground text-sm">All systems running normally</p>
+                    <p className="text-purple-300/60 text-sm">All systems running normally</p>
                   )}
                 </div>
+              </div>
               </div>
             </div>
           </div>
 
           {/* Right Sidebar: Activity Feed */}
-          <div className="bg-card/80 border border-border rounded-xl p-0 overflow-hidden flex flex-col h-full backdrop-blur-md">
-            <div className="p-4 border-b border-white/5 bg-white/5">
-              <h3 className="font-display font-bold text-white">Live Activity</h3>
-            </div>
+          <div className="relative group h-full">
+            <div className="absolute -inset-0.5 bg-gradient-to-b from-purple-600/30 via-violet-600/20 to-purple-600/30 rounded-xl blur-sm" />
+            <div className="relative bg-black/80 border border-purple-500/20 rounded-xl p-0 overflow-hidden flex flex-col h-full backdrop-blur-xl">
+              <div className="p-4 border-b border-purple-500/20 bg-purple-900/20">
+                <h3 className="font-display font-bold text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.3)]">Live Activity</h3>
+              </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
               {activityLogs && activityLogs.length > 0 ? (
                 activityLogs.map((item, i) => (
@@ -192,14 +202,15 @@ export default function Dashboard() {
                   </div>
                 ))
               ) : (
-                <p className="text-muted-foreground text-sm text-center">No recent activity</p>
+                <p className="text-purple-300/60 text-sm text-center">No recent activity</p>
               )}
             </div>
-            <div className="p-4 border-t border-white/5 bg-white/5">
-              <Button className="w-full bg-primary text-white font-bold tracking-wide" data-testid="button-view-all-logs">
+            <div className="p-4 border-t border-purple-500/20 bg-purple-900/20">
+              <Button className="w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white font-bold tracking-wide border-0 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all" data-testid="button-view-all-logs">
                 VIEW ALL LOGS
               </Button>
             </div>
+          </div>
           </div>
 
         </div>
