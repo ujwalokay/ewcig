@@ -897,7 +897,7 @@ export default function Launcher() {
       {/* Game Bar Style Widget - Top */}
       <div className="relative z-50 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-600/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-center justify-between px-4 py-2 gap-4">
-          {/* Left Section - Logo & Profile */}
+          {/* Left Section - Logo & Action Buttons Widget */}
           <div className="flex items-center gap-4">
             {/* Logo */}
             <div className="flex items-center gap-2">
@@ -912,6 +912,72 @@ export default function Launcher() {
             {/* Divider */}
             <div className="h-8 w-px bg-gray-600/50" />
 
+            {/* Action Buttons Widget - Now on Left */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold text-xs gap-1.5 h-8"
+                onClick={() => setActiveTab("food")}
+                data-testid="widget-btn-food"
+              >
+                <Utensils className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Food</span>
+              </Button>
+              
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold text-xs gap-1.5 h-8"
+                onClick={() => setActiveTab("tournaments")}
+                data-testid="widget-btn-tournament"
+              >
+                <Trophy className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Tournament</span>
+              </Button>
+              
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-xs gap-1.5 h-8"
+                onClick={() => setActiveTab("games")}
+                data-testid="widget-btn-games"
+              >
+                <Gamepad2 className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Games</span>
+              </Button>
+              
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-xs gap-1.5 h-8"
+                onClick={() => setActiveTab("rewards")}
+                data-testid="widget-btn-rewards"
+              >
+                <Gift className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Rewards</span>
+              </Button>
+
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-cyan-600 to-cyan-700 text-white font-bold text-xs gap-1.5 h-8"
+                onClick={() => setActiveTab("apps")}
+                data-testid="widget-btn-apps"
+              >
+                <AppWindow className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Apps</span>
+              </Button>
+
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-pink-600 to-pink-700 text-white font-bold text-xs gap-1.5 h-8"
+                onClick={() => setActiveTab("friends")}
+                data-testid="widget-btn-friends"
+              >
+                <Users className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">Friends</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Center Section - Profile & Session Time */}
+          <div className="flex items-center gap-4">
             {/* Profile */}
             <div className="flex items-center gap-2">
               <Avatar className="h-9 w-9 border-2 border-primary/50">
@@ -959,69 +1025,6 @@ export default function Launcher() {
                 </p>
               </div>
             </div>
-          </div>
-
-          {/* Center Section - Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap justify-center">
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold text-xs gap-1.5 h-8"
-              onClick={() => setActiveTab("food")}
-              data-testid="widget-btn-food"
-            >
-              <Utensils className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Food</span>
-            </Button>
-            
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold text-xs gap-1.5 h-8"
-              onClick={() => setActiveTab("tournaments")}
-              data-testid="widget-btn-tournament"
-            >
-              <Trophy className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Tournament</span>
-            </Button>
-            
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-xs gap-1.5 h-8"
-              onClick={() => setActiveTab("games")}
-              data-testid="widget-btn-games"
-            >
-              <Gamepad2 className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Games</span>
-            </Button>
-            
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-xs gap-1.5 h-8"
-              onClick={() => setActiveTab("rewards")}
-              data-testid="widget-btn-rewards"
-            >
-              <Gift className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Rewards</span>
-            </Button>
-
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-cyan-600 to-cyan-700 text-white font-bold text-xs gap-1.5 h-8"
-              onClick={() => setActiveTab("apps")}
-              data-testid="widget-btn-apps"
-            >
-              <AppWindow className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Apps</span>
-            </Button>
-
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-pink-600 to-pink-700 text-white font-bold text-xs gap-1.5 h-8"
-              onClick={() => setActiveTab("friends")}
-              data-testid="widget-btn-friends"
-            >
-              <Users className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Friends</span>
-            </Button>
           </div>
 
           {/* Right Section - Commands & Logout */}
