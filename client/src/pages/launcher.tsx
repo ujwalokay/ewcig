@@ -938,22 +938,22 @@ export default function Launcher() {
         </div>
 
         {/* Right Side Full Widget - Profile, Timer, Action Buttons - PREMIUM PURPLE THEME */}
-        <div className="relative z-50 w-20 flex flex-col items-center py-3 gap-2">
+        <div className="relative z-50 w-28 flex flex-col items-center py-3 gap-2">
           <div className="absolute -inset-0.5 bg-gradient-to-b from-purple-600/40 via-violet-600/30 to-purple-600/40 blur-sm" />
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl border-l border-purple-500/30" />
           
-          <div className="relative z-10 flex flex-col items-center w-full h-full py-3 gap-2">
+          <div className="relative z-10 flex flex-col items-center w-full h-full py-3 px-2 gap-2">
             {/* Logo */}
-            <div className="h-12 w-12 bg-gradient-to-br from-purple-600 to-violet-700 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)] mb-1 border border-purple-400/30">
-              <span className="text-white font-display font-bold text-xl">G</span>
+            <div className="h-14 w-14 bg-gradient-to-br from-purple-600 to-violet-700 rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)] mb-1 border border-purple-400/30">
+              <span className="text-white font-display font-bold text-2xl">G</span>
             </div>
 
             {/* Profile */}
             <div className="flex flex-col items-center gap-1 py-2 border-b border-purple-500/30 w-full">
-              <Avatar className="h-12 w-12 border-2 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+              <Avatar className="h-14 w-14 border-2 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                 {isGuest ? (
                   <AvatarFallback className="bg-purple-900/50 text-purple-300">
-                    <User className="h-5 w-5" />
+                    <User className="h-6 w-6" />
                   </AvatarFallback>
                 ) : (
                   <>
@@ -964,11 +964,11 @@ export default function Launcher() {
                   </>
                 )}
               </Avatar>
-              <p className="font-display font-bold text-white text-[10px] leading-tight text-center truncate w-full px-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.3)]">
+              <p className="font-display font-bold text-white text-xs leading-tight text-center truncate w-full px-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.3)]">
                 {isGuest ? "Guest" : loggedInUser || "ProGamer"}
               </p>
               <Badge className={cn(
-                "text-[8px] py-0 h-3.5",
+                "text-[9px] py-0 h-4",
                 isGuest 
                   ? "bg-purple-900/50 text-purple-300 border-purple-500/50"
                   : "bg-purple-500/30 text-purple-300 border-purple-400/50"
@@ -977,20 +977,30 @@ export default function Launcher() {
               </Badge>
             </div>
 
+            {/* Account Balance */}
+            <div className="flex flex-col items-center py-2 border-b border-purple-500/30 w-full">
+              <DollarSign className="h-5 w-5 text-emerald-400 mb-1 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
+              <p className="text-[8px] text-purple-300/60 uppercase tracking-wider leading-none">Balance</p>
+              <p className="text-sm font-mono font-bold text-emerald-400 leading-tight drop-shadow-[0_0_5px_rgba(16,185,129,0.3)]" data-testid="text-user-balance">
+                ${userBalance.toFixed(2)}
+              </p>
+            </div>
+
             {/* Session Time */}
             <div className="flex flex-col items-center py-2 border-b border-purple-500/30 w-full">
               <Clock className="h-5 w-5 text-purple-400 mb-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]" />
-              <p className="text-[7px] text-purple-300/60 uppercase tracking-wider leading-none">Time Left</p>
+              <p className="text-[8px] text-purple-300/60 uppercase tracking-wider leading-none">Time Left</p>
               <p className={cn(
-                "text-xs font-mono font-bold leading-tight",
+                "text-sm font-mono font-bold leading-tight",
                 isUnlimited ? "text-emerald-400" : "text-white drop-shadow-[0_0_5px_rgba(168,85,247,0.3)]"
               )} data-testid="text-session-time">
                 {isUnlimited ? "UNLIM" : sessionTimeLeft}
               </p>
             </div>
 
-            {/* Action Buttons - All Purple Theme */}
-            <div className="flex flex-col items-center gap-2 py-2 flex-1 overflow-y-auto custom-scrollbar">
+            {/* Action Buttons - All Purple Theme with ScrollArea */}
+            <ScrollArea className="flex-1 w-full">
+              <div className="flex flex-col items-center gap-2 py-2">
               <Button 
                 size="icon"
                 className="w-11 h-11 bg-purple-500/20 text-purple-300 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.2)] border border-purple-500/30 hover:bg-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all"
@@ -1044,7 +1054,8 @@ export default function Launcher() {
               >
                 <Users className="h-5 w-5" />
               </Button>
-            </div>
+              </div>
+            </ScrollArea>
 
             {/* Bottom Actions - Commands, Order, Logout */}
             <div className="flex flex-col items-center gap-2 pt-2 border-t border-purple-500/30 w-full">
