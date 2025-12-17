@@ -894,12 +894,11 @@ export default function Launcher() {
         }} 
       />
       
-      {/* Game Bar Style Widget - Top */}
+      {/* Top Bar - Simplified */}
       <div className="relative z-50 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-600/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-center justify-between px-4 py-2 gap-4">
-          {/* Left Section - Logo & Action Buttons Widget */}
+          {/* Left Section - Logo */}
           <div className="flex items-center gap-4">
-            {/* Logo */}
             <div className="flex items-center gap-2">
               <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
                 <div className="h-8 w-8 bg-primary rounded-md flex items-center justify-center text-white font-display font-bold text-lg skew-x-[-5deg]">
@@ -912,72 +911,6 @@ export default function Launcher() {
             {/* Divider */}
             <div className="h-8 w-px bg-gray-600/50" />
 
-            {/* Action Buttons Widget - Now on Left */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Button 
-                size="sm"
-                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold text-xs gap-1.5 h-8"
-                onClick={() => setActiveTab("food")}
-                data-testid="widget-btn-food"
-              >
-                <Utensils className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Food</span>
-              </Button>
-              
-              <Button 
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold text-xs gap-1.5 h-8"
-                onClick={() => setActiveTab("tournaments")}
-                data-testid="widget-btn-tournament"
-              >
-                <Trophy className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Tournament</span>
-              </Button>
-              
-              <Button 
-                size="sm"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-xs gap-1.5 h-8"
-                onClick={() => setActiveTab("games")}
-                data-testid="widget-btn-games"
-              >
-                <Gamepad2 className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Games</span>
-              </Button>
-              
-              <Button 
-                size="sm"
-                className="bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-xs gap-1.5 h-8"
-                onClick={() => setActiveTab("rewards")}
-                data-testid="widget-btn-rewards"
-              >
-                <Gift className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Rewards</span>
-              </Button>
-
-              <Button 
-                size="sm"
-                className="bg-gradient-to-r from-cyan-600 to-cyan-700 text-white font-bold text-xs gap-1.5 h-8"
-                onClick={() => setActiveTab("apps")}
-                data-testid="widget-btn-apps"
-              >
-                <AppWindow className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Apps</span>
-              </Button>
-
-              <Button 
-                size="sm"
-                className="bg-gradient-to-r from-pink-600 to-pink-700 text-white font-bold text-xs gap-1.5 h-8"
-                onClick={() => setActiveTab("friends")}
-                data-testid="widget-btn-friends"
-              >
-                <Users className="h-3.5 w-3.5" />
-                <span className="hidden lg:inline">Friends</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* Center Section - Profile & Session Time */}
-          <div className="flex items-center gap-4">
             {/* Profile */}
             <div className="flex items-center gap-2">
               <Avatar className="h-9 w-9 border-2 border-primary/50">
@@ -1067,54 +1000,109 @@ export default function Launcher() {
               <LogOut className="h-3.5 w-3.5 mr-1" />
               Logout
             </Button>
-
-            {/* Current Time */}
-            <div className="text-[10px] text-gray-400 font-mono hidden xl:block">
-              {currentTime.toLocaleTimeString()}
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Desktop Area - Below Game Bar */}
-      <div className="flex-1 relative">
-        {/* Slide-out Panel for Content */}
-        {activeTab !== "home" && (
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-md z-40 flex flex-col">
-            {/* Panel Header */}
-            <header className="h-12 bg-card/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-6 shrink-0">
-              <div className="flex items-center gap-4">
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  onClick={() => setActiveTab("home")}
-                  data-testid="button-close-panel"
-                >
-                  <X className="h-5 w-5 text-white" />
-                </Button>
-                <h1 className="text-lg font-display font-bold text-white uppercase tracking-wider">
-                  {sidebarItems.find(i => i.id === activeTab)?.label || 
-                   bottomItems.find(i => i.id === activeTab)?.label || ""}
-                </h1>
-              </div>
-            </header>
+      {/* Main Content Area with Right Side Widget */}
+      <div className="flex-1 relative flex">
+        {/* Desktop Area */}
+        <div className="flex-1 relative">
+          {/* Slide-out Panel for Content */}
+          {activeTab !== "home" && (
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-md z-40 flex flex-col">
+              {/* Panel Header */}
+              <header className="h-12 bg-card/90 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-6 shrink-0">
+                <div className="flex items-center gap-4">
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    onClick={() => setActiveTab("home")}
+                    data-testid="button-close-panel"
+                  >
+                    <X className="h-5 w-5 text-white" />
+                  </Button>
+                  <h1 className="text-lg font-display font-bold text-white uppercase tracking-wider">
+                    {sidebarItems.find(i => i.id === activeTab)?.label || 
+                     bottomItems.find(i => i.id === activeTab)?.label || ""}
+                  </h1>
+                </div>
+              </header>
 
-            {/* Panel Content */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-              <div className="max-w-5xl mx-auto">
-                {activeTab === "games" && <GamesContent onLaunch={handleLaunch} />}
-                {activeTab === "apps" && <AppsContent />}
-                {activeTab === "food" && <FoodContent onOrder={handleOrder} />}
-                {activeTab === "rewards" && <RewardsContent />}
-                {activeTab === "tournaments" && <TournamentsContent />}
-                {activeTab === "friends" && <FriendsContent />}
-                {activeTab === "profile" && <ProfileContent />}
-                {activeTab === "settings" && <SettingsContent />}
-                {activeTab === "help" && <HelpContent />}
+              {/* Panel Content */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                <div className="max-w-5xl mx-auto">
+                  {activeTab === "games" && <GamesContent onLaunch={handleLaunch} />}
+                  {activeTab === "apps" && <AppsContent />}
+                  {activeTab === "food" && <FoodContent onOrder={handleOrder} />}
+                  {activeTab === "rewards" && <RewardsContent />}
+                  {activeTab === "tournaments" && <TournamentsContent />}
+                  {activeTab === "friends" && <FriendsContent />}
+                  {activeTab === "profile" && <ProfileContent />}
+                  {activeTab === "settings" && <SettingsContent />}
+                  {activeTab === "help" && <HelpContent />}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* Right Side Widget - Vertical Action Buttons */}
+        <div className="relative z-50 w-16 bg-gradient-to-b from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-md border-l border-gray-600/50 flex flex-col items-center py-4 gap-3">
+          <Button 
+            size="icon"
+            className="w-11 h-11 bg-gradient-to-br from-orange-600 to-orange-700 text-white rounded-xl shadow-lg"
+            onClick={() => setActiveTab("food")}
+            data-testid="widget-btn-food"
+          >
+            <Utensils className="h-5 w-5" />
+          </Button>
+          
+          <Button 
+            size="icon"
+            className="w-11 h-11 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-xl shadow-lg"
+            onClick={() => setActiveTab("tournaments")}
+            data-testid="widget-btn-tournament"
+          >
+            <Trophy className="h-5 w-5" />
+          </Button>
+          
+          <Button 
+            size="icon"
+            className="w-11 h-11 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl shadow-lg"
+            onClick={() => setActiveTab("games")}
+            data-testid="widget-btn-games"
+          >
+            <Gamepad2 className="h-5 w-5" />
+          </Button>
+          
+          <Button 
+            size="icon"
+            className="w-11 h-11 bg-gradient-to-br from-green-600 to-green-700 text-white rounded-xl shadow-lg"
+            onClick={() => setActiveTab("rewards")}
+            data-testid="widget-btn-rewards"
+          >
+            <Gift className="h-5 w-5" />
+          </Button>
+
+          <Button 
+            size="icon"
+            className="w-11 h-11 bg-gradient-to-br from-cyan-600 to-cyan-700 text-white rounded-xl shadow-lg"
+            onClick={() => setActiveTab("apps")}
+            data-testid="widget-btn-apps"
+          >
+            <AppWindow className="h-5 w-5" />
+          </Button>
+
+          <Button 
+            size="icon"
+            className="w-11 h-11 bg-gradient-to-br from-pink-600 to-pink-700 text-white rounded-xl shadow-lg"
+            onClick={() => setActiveTab("friends")}
+            data-testid="widget-btn-friends"
+          >
+            <Users className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
     </div>
   );
