@@ -1057,12 +1057,11 @@ export default function Launcher() {
               </div>
             </ScrollArea>
 
-            {/* Bottom Actions - Commands, Order, Logout */}
-            <div className="flex flex-col items-center gap-2 pt-2 border-t border-purple-500/30 w-full shrink-0">
+            {/* Bottom Actions - Pancafe Pro Style Grid */}
+            <div className="grid grid-cols-2 gap-1 pt-2 border-t border-purple-500/30 w-full shrink-0">
               <Button 
-                size="icon"
                 variant="outline"
-                className="w-11 h-11 bg-purple-900/30 border-purple-500/40 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-all"
+                className="h-8 px-2 text-[10px] bg-gray-700/80 border-gray-600 text-white rounded-sm hover:bg-gray-600 transition-all"
                 onClick={() => {
                   toast({
                     title: "Commands",
@@ -1071,27 +1070,34 @@ export default function Launcher() {
                 }}
                 data-testid="widget-btn-commands"
               >
-                <Settings className="h-5 w-5" />
+                Commands
               </Button>
               
               <Button 
-                size="icon"
                 variant="outline"
-                className="w-11 h-11 bg-purple-900/30 border-purple-500/40 text-purple-300 rounded-xl hover:bg-purple-500/30 transition-all"
+                className="h-8 px-2 text-[10px] bg-gray-700/80 border-gray-600 text-white rounded-sm hover:bg-gray-600 transition-all"
                 onClick={() => setActiveTab("food")}
                 data-testid="widget-btn-give-order"
               >
-                <ShoppingCart className="h-5 w-5" />
+                Give Order
               </Button>
 
               <Button 
-                size="icon"
                 variant="outline"
-                className="w-11 h-11 bg-red-900/30 border-red-500/40 text-red-400 rounded-xl hover:bg-red-500/30 transition-all"
+                className="h-8 px-2 text-[10px] bg-gray-700/80 border-gray-600 text-white rounded-sm hover:bg-gray-600 transition-all"
+                onClick={() => setActiveTab("profile")}
+                data-testid="widget-btn-finesse"
+              >
+                Finesse
+              </Button>
+
+              <Button 
+                variant="outline"
+                className="h-8 px-2 text-[10px] bg-gray-700/80 border-gray-600 text-white rounded-sm hover:bg-gray-600 transition-all"
                 onClick={handleLogout}
                 data-testid="widget-btn-logout"
               >
-                <LogOut className="h-5 w-5" />
+                Logout
               </Button>
             </div>
           </div>
