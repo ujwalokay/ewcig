@@ -1,7 +1,7 @@
 import { MainLayout } from "@/components/layout/main-layout";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { PCGrid } from "@/components/dashboard/pc-grid";
-import { Users, DollarSign, Clock, Zap } from "lucide-react";
+import { Users, DollarSign, Clock, Zap, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,7 +48,7 @@ export default function Dashboard() {
       <div className="space-y-8">
         
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {statsLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-28" />
@@ -81,6 +81,13 @@ export default function Dashboard() {
                 icon={Zap} 
                 trend={(stats?.activeSessions || 0) > (stats?.totalTerminals || 1) * 0.8 ? "High Usage" : "Normal"} 
                 trendUp={false}
+              />
+              <StatsCard 
+                title="Account Balance" 
+                value="$1,250.00"
+                icon={Wallet} 
+                trend="Available funds" 
+                trendUp={true}
               />
             </>
           )}

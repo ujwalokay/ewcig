@@ -50,34 +50,34 @@
   --radius-lg: 8px;
 }
 
-/* CYBER-INDUSTRIAL THEME - DARK MODE DEFAULT */
+/* PREMIUM PURPLE THEME - DARK MODE DEFAULT */
 :root {
-  /* Base - Deep Dark Industrial */
-  --background: 240 10% 4%; /* #09090b - Almost Black */
-  --foreground: 0 0% 95%;   /* #f2f2f2 - Off White */
+  /* Base - Pure Black */
+  --background: 0 0% 0%; /* Pure Black */
+  --foreground: 0 0% 98%;   /* Clean White */
 
-  /* Cards - Slightly Lighter Panels */
-  --card: 240 6% 10%;       /* #18181b */
-  --card-foreground: 0 0% 95%;
+  /* Cards - Subtle Dark Purple */
+  --card: 270 20% 8%;       /* Dark Purple Tint */
+  --card-foreground: 0 0% 98%;
 
   /* Popover */
-  --popover: 240 6% 10%;
-  --popover-foreground: 0 0% 95%;
+  --popover: 270 20% 8%;
+  --popover-foreground: 0 0% 98%;
 
-  /* Primary - GG Orange / Amber Glow */
-  --primary: 25 95% 53%;    /* #ff6b00 - Electric Orange */
+  /* Primary - Vibrant Purple */
+  --primary: 270 80% 60%;    /* Vibrant Purple */
   --primary-foreground: 0 0% 100%;
 
-  /* Secondary - Tech Cyan/Slate */
-  --secondary: 180 50% 15%; /* Dark Teal Background */
-  --secondary-foreground: 180 70% 60%; /* Cyan Text */
+  /* Secondary - Deeper Purple */
+  --secondary: 270 40% 15%; /* Dark Purple Background */
+  --secondary-foreground: 270 80% 80%; /* Light Purple Text */
 
   /* Muted - Utility Text */
-  --muted: 240 4% 16%;
-  --muted-foreground: 240 5% 65%;
+  --muted: 270 10% 12%;
+  --muted-foreground: 270 10% 60%;
 
-  /* Accent - Hover states / Highlights */
-  --accent: 25 95% 53%;     /* Reuse Primary for Accents mostly */
+  /* Accent - Purple Highlights */
+  --accent: 280 85% 65%;     /* Bright Purple Accent */
   --accent-foreground: 0 0% 100%;
 
   /* Destructive */
@@ -85,21 +85,21 @@
   --destructive-foreground: 0 0% 98%;
 
   /* Borders & Inputs */
-  --border: 240 4% 16%;     /* Subtle borders */
-  --input: 240 4% 16%;
-  --ring: 25 95% 53%;       /* Orange Focus Ring */
+  --border: 270 15% 18%;     /* Purple tinted borders */
+  --input: 270 15% 12%;
+  --ring: 270 80% 60%;       /* Purple Focus Ring */
 
   /* Sidebar specific */
-  --sidebar: 240 6% 8%;     /* Darker than card */
-  --sidebar-foreground: 240 5% 70%;
-  --sidebar-primary: 25 95% 53%;
+  --sidebar: 270 15% 5%;     /* Darker than card */
+  --sidebar-foreground: 270 10% 70%;
+  --sidebar-primary: 270 80% 60%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 4% 16%;
+  --sidebar-accent: 270 20% 15%;
   --sidebar-accent-foreground: 0 0% 95%;
-  --sidebar-border: 240 4% 16%;
-  --sidebar-ring: 25 95% 53%;
+  --sidebar-border: 270 15% 15%;
+  --sidebar-ring: 270 80% 60%;
 
-  --radius: 0.25rem;
+  --radius: 0.5rem;
 }
 
 @layer base {
@@ -109,16 +109,35 @@
   body {
     @apply font-body antialiased bg-background text-foreground selection:bg-primary/20 selection:text-primary;
     background-image: 
-      radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.05), transparent 40%),
-      linear-gradient(to bottom, transparent, hsl(var(--background))),
-      repeating-linear-gradient(90deg, hsl(var(--border) / 0.05) 0px, hsl(var(--border) / 0.05) 1px, transparent 1px, transparent 40px),
-      repeating-linear-gradient(0deg, hsl(var(--border) / 0.05) 0px, hsl(var(--border) / 0.05) 1px, transparent 1px, transparent 40px);
+      radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.08), transparent 50%),
+      radial-gradient(circle at 80% 80%, hsl(var(--accent) / 0.05), transparent 40%),
+      linear-gradient(to bottom, transparent, hsl(var(--background)));
     background-attachment: fixed;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight uppercase;
   }
+}
+
+/* Custom Scrollbar Styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.5);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.7);
 }
 
 .glass-panel {

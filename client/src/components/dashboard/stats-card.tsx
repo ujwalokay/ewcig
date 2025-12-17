@@ -14,17 +14,17 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, icon: Icon, trend, trendUp, className, description }: StatsCardProps) {
   return (
-    <Card className={cn("bg-card border-border/50 shadow-lg relative overflow-hidden group", className)}>
-      <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-        <Icon className="h-24 w-24 -mr-4 -mt-4 transform rotate-12" />
+    <Card className={cn("bg-transparent border border-primary/20 shadow-lg shadow-primary/5 relative overflow-hidden group backdrop-blur-sm", className)}>
+      <div className="absolute top-0 right-0 p-3 opacity-15 group-hover:opacity-25 transition-opacity">
+        <Icon className="h-20 w-20 -mr-2 -mt-2 transform rotate-12 text-primary" />
       </div>
       
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
           {title}
         </CardTitle>
-        <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-[0_0_10px_rgba(255,107,0,0.1)]">
-          <Icon className="h-4 w-4" />
+        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/30 shadow-[0_0_15px_rgba(147,51,234,0.2)]">
+          <Icon className="h-5 w-5" />
         </div>
       </CardHeader>
       <CardContent>
@@ -34,7 +34,7 @@ export function StatsCard({ title, value, icon: Icon, trend, trendUp, className,
             {trend && (
               <span className={cn(
                 "flex items-center font-medium",
-                trendUp ? "text-green-500" : "text-red-500"
+                trendUp ? "text-emerald-400" : "text-primary"
               )}>
                 {trendUp ? "↑" : "↓"} {trend}
               </span>
@@ -44,8 +44,7 @@ export function StatsCard({ title, value, icon: Icon, trend, trendUp, className,
         )}
       </CardContent>
       
-      {/* Decorative bottom line */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
     </Card>
   );
 }
